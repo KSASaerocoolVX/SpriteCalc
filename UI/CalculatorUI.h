@@ -1,8 +1,9 @@
 #include <SFML/Graphics.hpp>
 #include "Button.h"
+#include "IMovable.h"
 
 
-class CalculatorUI
+class CalculatorUI: public IMovable
 {
 private:
     sf::Texture m_texture;
@@ -17,4 +18,9 @@ public:
     CalculatorUI(sf::Vector2f position);
 
     void Draw(sf::RenderWindow& window);
+
+    virtual void Move()
+    {
+
+    }
 };

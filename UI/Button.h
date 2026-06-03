@@ -1,8 +1,9 @@
 #include <SFML/Graphics.hpp>
 #include <string>
 #include <optional>
+#include "IMovable.h"
 
-class Button
+class Button: public IMovable
 {
 private:
 	sf::Sprite m_sprite;
@@ -21,4 +22,9 @@ public:
 	Button(sf::Vector2f position, const sf::Texture& texture);
 
 	void Draw(sf::RenderWindow &window);
+
+	virtual void Move()
+	{
+
+	}
 };
