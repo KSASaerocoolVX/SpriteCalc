@@ -1,8 +1,8 @@
 #pragma once
-class IMovable
+class ITransformable
 {
 public:
-    virtual ~IMovable() {}
+    virtual ~ITransformable() {}
     virtual void Move(sf::Vector2f targetPosition) = 0;
     virtual void Draw(sf::RenderWindow& window) = 0;
 };

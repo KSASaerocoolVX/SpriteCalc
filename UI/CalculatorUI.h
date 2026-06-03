@@ -1,9 +1,9 @@
 #include <SFML/Graphics.hpp>
 #include "Button.h"
-#include "IMovable.h"
+#include "ITransformable.h"
 
 
-class CalculatorUI: public IMovable
+class CalculatorUI: public ITransformable
 {
 private:
     sf::Texture m_texture;
@@ -14,7 +14,7 @@ private:
 
     sf::Sprite m_sprite;
     sf::Font m_font;
-    std::vector<std::unique_ptr<IMovable>> children;
+    std::vector<std::unique_ptr<ITransformable>> children;
 public:
     CalculatorUI(sf::Vector2f position);
 

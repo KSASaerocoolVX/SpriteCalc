@@ -1,10 +1,10 @@
 #include <SFML/Graphics.hpp>
 #include <string>
 #include <optional>
-#include "IMovable.h"
+#include "ITransformable.h"
 #include <functional>
 
-class Button: public IMovable
+class Button: public ITransformable
 {
 private:
 	sf::Sprite m_sprite;

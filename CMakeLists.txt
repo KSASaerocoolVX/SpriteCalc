@@ -17,7 +17,7 @@ add_executable(SpriteCalc
     "UI/CalculatorUI.cpp"
     "UI/Button.cpp"
     "UI/Background.cpp"
- "UI/IMovable.h")
+ "UI/ITransformable.h")
 
 add_custom_command(TARGET SpriteCalc POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
