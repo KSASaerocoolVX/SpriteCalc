@@ -21,4 +21,6 @@ public:
     virtual void Draw(sf::RenderWindow& window);
 
     virtual void Move(sf::Vector2f targetPosition);
+
+    virtual void Scale(sf::Vector2f targetScale);
 };

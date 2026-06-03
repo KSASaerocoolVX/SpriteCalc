@@ -32,5 +32,7 @@ public:
 
 	virtual void Move(sf::Vector2f targetPosition);
 
+	virtual void Scale(sf::Vector2f targetScale);
+
 	void PrintLabel();
 };

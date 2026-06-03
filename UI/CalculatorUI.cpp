@@ -60,7 +60,7 @@ CalculatorUI::CalculatorUI(sf::Vector2f position) : m_sprite(m_texture)
 
 	sf::Vector2u textureSize = m_texture.getSize();
 	//m_sprite.setOrigin(sf::Vector2f(textureSize.x / 2.0f, textureSize.y / 2.0f));
-	m_sprite.setScale(sf::Vector2f(1.0f, 1.0f));
+	//m_sprite.setScale(sf::Vector2f(1.0f, 1.0f));
 
 	//bigint info buttons
 	children.push_back(std::make_unique<Button>(sf::Vector2f(0, 0), m_infoTexture,m_infoTexture));
@@ -94,6 +94,7 @@ CalculatorUI::CalculatorUI(sf::Vector2f position) : m_sprite(m_texture)
 	//buttonPositions.emplace_back(sf::Vector2f(0, 0));
 	//buttonPositions.emplace_back(sf::Vector2f(1, 0));
 
+	Scale(sf::Vector2f(2.0f,2.0f));
 	Move(position);
 }
 
@@ -119,6 +120,50 @@ void CalculatorUI::Move(sf::Vector2f targetPosition)
 	for (auto& child : children)
 	{
 		child->Move(sf::Vector2f(deltaX,deltaY));
+	}
+}
+
+void CalculatorUI::Scale(sf::Vector2f targetScale)
+{
+	m_sprite.setScale(targetScale);
+
+	children.clear();
+
+	sf::Vector2u textureSize = sf::Vector2u(m_texture.getSize().x * targetScale.x, m_texture.getSize().y*targetScale.y);
+	//m_sprite.setOrigin(sf::Vector2f(textureSize.x / 2.0f, textureSize.y / 2.0f));
+	//m_sprite.setScale(sf::Vector2f(1.0f, 1.0f));
+
+	//bigint info buttons
+	children.push_back(std::make_unique<Button>(sf::Vector2f(0, 0), m_infoTexture, m_infoTexture));
+	children.push_back(std::make_unique<Button>(sf::Vector2f(textureSize.x - m_bigIntTexture.getSize().x*targetScale.x, 0), m_bigIntTexture, m_bigIntTexture));
+
+	//main buttons
+
+	float texWidth = static_cast<float>(textureSize.x);
+	float texHeight = static_cast<float>(textureSize.y);
+
+	float offsetY = texHeight * 0.325f;
+	float offsetX = texWidth * 0.11f;
+
+	float paddingX = texWidth * 0.028f;
+	float paddingY = texHeight * 0.02f;
+
+	for (int i = 0; i < 5; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			float stepX = (m_buttonIdleTexture.getSize().x*targetScale.x + paddingX) * j;
+			float stepY = ((m_buttonIdleTexture.getSize().y*targetScale.y + paddingY) * i);
+			auto pos = sf::Vector2f(offsetX + stepX, offsetY + stepY);
+
+			std::string label = intToLabel((i * 4) + j);
+			children.push_back(std::make_unique<Button>(pos, m_buttonIdleTexture, m_buttonHoverTexture, m_font, label));
+		}
+	}
+
+	for (auto& child : children)
+	{
+		child->Scale(targetScale);
 	}
 }
 

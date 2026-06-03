@@ -81,6 +81,17 @@ void Button::Move(sf::Vector2f offset)
 	}
 }
 
+void Button::Scale(sf::Vector2f targetScale)
+{
+	m_sprite.setScale(targetScale);
+
+	if (m_text.has_value())
+	{
+		m_text->setCharacterSize(14 * targetScale.x);
+	}
+}
+
+
 void Button::PrintLabel()
 {
 	std::cout << "clicked on" << m_label << std::endl;
