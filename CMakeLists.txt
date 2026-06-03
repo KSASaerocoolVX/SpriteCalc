@@ -12,7 +12,19 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SFML)
 
-add_executable(SpriteCalc UI/main.cpp)
+add_executable(SpriteCalc UI/main.cpp "UI/CalculatorUI.cpp" "UI/Button.cpp" "UI/Background.cpp")
+
+add_custom_command(TARGET SpriteCalc POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_CURRENT_SOURCE_DIR}/UI/assets"
+    "$<TARGET_FILE_DIR:SpriteCalc>/UI/assets"
+)
+
+add_custom_command(TARGET SpriteCalc POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_CURRENT_SOURCE_DIR}/UI/shaders"
+    "$<TARGET_FILE_DIR:SpriteCalc>/UI/shaders"
+)
 
 target_link_libraries(SpriteCalc PRIVATE SFML::Graphics SFML::Window SFML::System)
 

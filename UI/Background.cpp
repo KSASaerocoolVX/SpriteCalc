@@ -1,0 +1,27 @@
+#include <SFML/Graphics.hpp>
+#include <iostream>
+
+class Background
+{
+private:
+	unsigned int m_width;
+	unsigned int m_height;
+
+	sf::Shader m_shader;
+	sf::RectangleShape m_shape;
+
+public:
+    Background(unsigned int width, unsigned int height, const std::string& shaderPath): m_width(width), m_height(height)
+    {
+		m_shape.setSize(sf::Vector2f(static_cast<float>(m_width), static_cast<float>(m_height)));
+
+		if (!m_shader.loadFromFile(shaderPath, sf::Shader::Type::Fragment)) {
+			std::cerr << "failed to load shader from: " << shaderPath << std::endl;
+		}
+    }
+
+	void Draw(sf::RenderWindow& window)
+	{
+		window.draw(m_shape, &m_shader);
+	}
+};
