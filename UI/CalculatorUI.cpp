@@ -54,12 +54,13 @@ CalculatorUI::CalculatorUI(sf::Vector2f position) : m_sprite(m_texture)
 		std::cerr << "failed to load bigIntButton texture" << std::endl;
 	}
 
-	//m_sprite.setPosition(position);
 	sf::Vector2u textureSize = m_texture.getSize();
+	//m_sprite.setOrigin(sf::Vector2f(textureSize.x / 2.0f, textureSize.y / 2.0f));
+	m_sprite.setScale(sf::Vector2f(1.0f, 1.0f));
 
 	//bigint info buttons
-	buttonPositions.emplace_back(sf::Vector2f(0,0),m_infoTexture);
-	buttonPositions.emplace_back(sf::Vector2f(textureSize.x-m_bigIntTexture.getSize().x, 0), m_bigIntTexture);
+	children.push_back(std::make_unique<Button>(sf::Vector2f(0, 0), m_infoTexture));
+	children.push_back(std::make_unique<Button>(sf::Vector2f(textureSize.x - m_bigIntTexture.getSize().x, 0), m_bigIntTexture));
 
 	//main buttons
 
@@ -81,22 +82,39 @@ CalculatorUI::CalculatorUI(sf::Vector2f position) : m_sprite(m_texture)
 			auto pos = sf::Vector2f(offsetX+ stepX,offsetY + stepY);
 
 			std::string label = intToLabel((i * 4) + j);
-			buttonPositions.emplace_back(pos, m_buttonTexture, m_font, label);
+			children.push_back(std::make_unique<Button>(pos, m_buttonTexture, m_font, label));
 		}
 	}
 
 
 	//buttonPositions.emplace_back(sf::Vector2f(0, 0));
 	//buttonPositions.emplace_back(sf::Vector2f(1, 0));
+
+	Move(position);
 }
 
 void CalculatorUI::Draw(sf::RenderWindow& window)
 {
 	window.draw(m_sprite);
 
-	for (auto& button : buttonPositions)
+	for (auto& button : children)
 	{
-		button.Draw(window);
+		button->Draw(window);
+	}
+}
+
+void CalculatorUI::Move(sf::Vector2f targetPosition)
+{
+	sf::Vector2f currentPosition = m_sprite.getPosition();
+
+	float deltaX = targetPosition.x - currentPosition.x;
+	float deltaY = targetPosition.y - currentPosition.y;
+
+	m_sprite.setPosition(sf::Vector2f(currentPosition.x+deltaX,currentPosition.y+deltaY));
+
+	for (auto& child : children)
+	{
+		child->Move(sf::Vector2f(deltaX,deltaY));
 	}
 }
 

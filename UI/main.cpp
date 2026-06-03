@@ -67,6 +67,8 @@ int main()
 
 			}
 		}
+		sf::Vector2i mousePos = sf::Mouse::getPosition();
+		cout << "Mouse" << mousePos.x << "---" << mousePos.y << endl;
 
 		window.clear();
 		bg.Draw(window, totalTime);

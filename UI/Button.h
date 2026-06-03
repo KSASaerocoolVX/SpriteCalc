@@ -2,6 +2,7 @@
 #include <string>
 #include <optional>
 #include "IMovable.h"
+#include <functional>
 
 class Button: public IMovable
 {
@@ -15,6 +16,8 @@ private:
 
 	sf::Color textColor = sf::Color(99,155,255);
 
+	std::function<void()> onClick;
+
 public:
 
 	Button(sf::Vector2f position, const sf::Texture& texture, const sf::Font& font, const std::string& label);
@@ -23,8 +26,7 @@ public:
 
 	void Draw(sf::RenderWindow &window);
 
-	virtual void Move()
-	{
+	virtual void Move(sf::Vector2f targetPosition);
 
-	}
+	void PrintLabel();
 };

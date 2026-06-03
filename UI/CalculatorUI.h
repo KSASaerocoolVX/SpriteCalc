@@ -13,14 +13,11 @@ private:
 
     sf::Sprite m_sprite;
     sf::Font m_font;
-    std::vector<Button> buttonPositions;
+    std::vector<std::unique_ptr<IMovable>> children;
 public:
     CalculatorUI(sf::Vector2f position);
 
-    void Draw(sf::RenderWindow& window);
+    virtual void Draw(sf::RenderWindow& window);
 
-    virtual void Move()
-    {
-
-    }
+    virtual void Move(sf::Vector2f targetPosition);
 };
