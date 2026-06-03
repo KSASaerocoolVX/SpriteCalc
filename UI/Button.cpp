@@ -1,12 +1,13 @@
 #include <SFML/Graphics.hpp>
+#include "Button.h"
+#include <iostream>
 
-
-class Button
+Button::Button(sf::Vector2f position, const sf::Texture& texture): m_sprite(texture)
 {
-private:
-	sf::Sprite sprite;
-	sf::Text text;
+	m_sprite.setPosition(position);
+}
 
-public:
-	void Draw(sf::RenderWindow& window);
-};
+void Button::Draw(sf::RenderWindow& window)
+{
+	window.draw(m_sprite);
+}
