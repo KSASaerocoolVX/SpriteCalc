@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
-#include <>
+#include "Background.h"
+#include "CalculatorUI.h"
 using namespace std;
 
 //main потом будет перемещем из Ui
@@ -11,6 +12,8 @@ struct Config
 	unsigned int windowHeight = 800;
 	
 	bool enableBg = false;
+
+	string bgShaderPath = "UI/shaders/bg.frag";
 };
 
 float easeInOutCubic(float x) {
@@ -22,13 +25,18 @@ bool enable_bg = false;
 int main()
 {
 	Config config;
+
 	int width = config.windowWidth;
 	int height = config.windowHeight;
 
 	sf::RenderWindow window(sf::VideoMode({ width, height }), "SpriteCalc");
 
 	//bg
-	Background
+	Background bg(width,height,config.bgShaderPath);
+
+	//calculator
+	//принимает только расположение
+	CalculatorUI calculator();
 
 	sf::Texture texture;
 

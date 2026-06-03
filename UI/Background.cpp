@@ -24,4 +24,13 @@ public:
 	{
 		window.draw(m_shape, &m_shader);
 	}
+
+	//todo если шейдер зависит от времени
+	void Draw(sf::RenderWindow& window, float totalTime)
+	{
+		m_shader.setUniform("iTime", totalTime);
+		m_shader.setUniform("iResolution", sf::Vector2f(window.getSize()));
+
+		window.draw(m_shape, &m_shader);
+	}
 };

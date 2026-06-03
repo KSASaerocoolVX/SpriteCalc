@@ -12,7 +12,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SFML)
 
-add_executable(SpriteCalc UI/main.cpp "UI/CalculatorUI.cpp" "UI/Button.cpp" "UI/Background.cpp")
+add_executable(SpriteCalc
+    UI/main.cpp
+    "UI/CalculatorUI.cpp"
+    "UI/Button.cpp"
+    "UI/Background.cpp"
+)
 
 add_custom_command(TARGET SpriteCalc POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
