@@ -26,55 +26,30 @@ int main()
 {
 	Config config;
 
-	int width = config.windowWidth;
-	int height = config.windowHeight;
+	float width = config.windowWidth;
+	float height = config.windowHeight;
 
-	sf::RenderWindow window(sf::VideoMode({ width, height }), "SpriteCalc");
+	sf::Vector2 windowCenter = sf::Vector2f(width/2,height/2);
+
+	sf::RenderWindow window(sf::VideoMode({ 800, 800 }), "SpriteCalc");
 
 	//bg
 	Background bg(width,height,config.bgShaderPath);
 
 	//calculator
 	//принимает только расположение
-	CalculatorUI calculator();
+	//CalculatorUI calculator(windowCenter);
 
-	sf::Texture texture;
-
-	if (!texture.loadFromFile("UI/assets/calculator_ostov.png")) {
-		std::cerr << "failed to load texture" << std::endl;
-		return -1;
-	}
-
-	sf::Sprite sprite(texture);
-	//sprite.setPosition({ 10.f, 50.f });
-
-
-	sf::Shader shader;
-
-	cout << "Application started successfully!" << endl;
-
-	if (!sf::Shader::isAvailable())
-	{
-		return -1;
-	}
-	else
-	{
-		cout << "Shader support is available." << endl;
-		if (!shader.loadFromFile("UI/shaders/bg.frag", sf::Shader::Type::Fragment))
-		{
-			cout << "Failed to load shader." << endl;
-			return -1;
-		}
-	}
 	sf::Clock clock;
 	float totalTime = 0.f;
-
 
 	while (window.isOpen())
 	{
 		sf::Time elasped = clock.restart();
 		float deltaTime = elasped.asSeconds();
+		totalTime += deltaTime;
 
+		bg.Draw(window);
 
 		while (const std::optional event = window.pollEvent())
 		{
@@ -90,36 +65,9 @@ int main()
 			}
 		}
 
-		//sf::FloatRect bounds = sprite.getGlobalBounds();
-
-		//sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-
-		//if (bounds.contains(static_cast<sf::Vector2f>(mousePos))) {
-
-		//	totalTime += deltaTime;
-
-
-		//	auto positionLerped = sprite.getPosition().x + 10.f;
-
-		//	sf::Vector2f upperLeftCorner = { 0,0 };
-		//	sf::Vector2 centerOfTheScreen = { static_cast<float>(window.getSize().x) / 2, static_cast<float>(window.getSize().y) / 2 };
-
-		//	sf::Vector2f upperRightCorner = { static_cast<float>(window.getSize().x), 0 };
-
-		//	sf::Vector2f targetPosition = (centerOfTheScreen * easeInOutCubic(abs(sin(totalTime)))) + (upperRightCorner * static_cast<float>(1.0 - easeInOutCubic(abs(sin(totalTime)))));
-
-		//	sprite.setPosition(targetPosition);
-		//}
-
-
-		//shader.setUniform("iTime", totalTime);
-		//shader.setUniform("iResolution", sf::Vector2f(window.getSize()));
-		////shader.setUniform("texture1", texture);
-
-		//window.clear();
-		//window.draw(shape, &shader);
-		//window.draw(sprite);
-		//window.display();
+		window.clear();
+		bg.Draw(window, totalTime);
+		window.display();
 	}
 }
 

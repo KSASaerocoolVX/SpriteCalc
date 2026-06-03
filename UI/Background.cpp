@@ -1,17 +1,7 @@
-#include <SFML/Graphics.hpp>
+#include "Background.h"
 #include <iostream>
 
-class Background
-{
-private:
-	unsigned int m_width;
-	unsigned int m_height;
-
-	sf::Shader m_shader;
-	sf::RectangleShape m_shape;
-
-public:
-    Background(unsigned int width, unsigned int height, const std::string& shaderPath): m_width(width), m_height(height)
+    Background::Background(unsigned int width, unsigned int height, const std::string& shaderPath): m_width(width), m_height(height)
     {
 		m_shape.setSize(sf::Vector2f(static_cast<float>(m_width), static_cast<float>(m_height)));
 
@@ -20,17 +10,17 @@ public:
 		}
     }
 
-	void Draw(sf::RenderWindow& window)
+	void Background::Draw(sf::RenderWindow& window)
 	{
 		window.draw(m_shape, &m_shader);
 	}
 
 	//todo если шейдер зависит от времени
-	void Draw(sf::RenderWindow& window, float totalTime)
+	void Background::Draw(sf::RenderWindow& window, float totalTime)
 	{
 		m_shader.setUniform("iTime", totalTime);
 		m_shader.setUniform("iResolution", sf::Vector2f(window.getSize()));
 
 		window.draw(m_shape, &m_shader);
 	}
-};
+
