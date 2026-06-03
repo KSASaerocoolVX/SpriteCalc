@@ -38,7 +38,7 @@ int main()
 
 	//calculator
 	//принимает только расположение
-	//CalculatorUI calculator(windowCenter);
+	CalculatorUI calculator(windowCenter);
 
 	sf::Clock clock;
 	float totalTime = 0.f;
@@ -67,6 +67,7 @@ int main()
 
 		window.clear();
 		bg.Draw(window, totalTime);
+		calculator.Draw(window);
 		window.display();
 	}
 }

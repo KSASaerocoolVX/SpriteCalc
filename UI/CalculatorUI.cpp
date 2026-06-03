@@ -1,11 +1,17 @@
-#include <SFML/Graphics.hpp>
-#include "Button.h"
+#include "CalculatorUI.h"
+#include <iostream>
 
-
-class CalculatorUI
+CalculatorUI::CalculatorUI(sf::Vector2f position) : m_sprite(m_texture)
 {
-    sf::Font font;
-    std::vector<Button> buttonPositions;
-    Button helpButton;
-    Button bigIntButton;
-};
+	if (!m_texture.loadFromFile("UI/assets/calculator_ostov.png")) {
+		std::cerr << "failed to load calculator texture" << std::endl;
+	}
+
+	m_sprite.setTexture(m_texture, true);
+	m_sprite.setPosition(position);
+}
+
+void CalculatorUI::Draw(sf::RenderWindow& window)
+{
+	window.draw(m_sprite);
+}

@@ -4,8 +4,12 @@
 class CalculatorUI
 {
 private:
-    sf::Font font;
+    sf::Texture m_texture;
+    sf::Sprite m_sprite;
+    sf::Font m_font;
     std::vector<Button> buttonPositions;
-    Button helpButton;
-    Button bigIntButton;
+public:
+    CalculatorUI(sf::Vector2f position);
+
+    void Draw(sf::RenderWindow& window);
 };
