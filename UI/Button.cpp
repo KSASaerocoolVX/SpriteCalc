@@ -36,6 +36,23 @@ Button::Button(sf::Vector2f position, const sf::Texture& texture) : m_sprite(tex
 
 void Button::Draw(sf::RenderWindow& window)
 {
+
+
+	auto mousePos = sf::Mouse::getPosition(window);
+
+	sf::Vector2f mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
+
+
+	if (m_sprite.getGlobalBounds().contains(mousePosF))
+		isHovered = true;
+	else
+		isHovered = false;
+
+	if (isHovered)
+	{
+		std::cout << m_label << std::endl;
+	}
+
 	window.draw(m_sprite);
 	if (m_text.has_value())
 	{

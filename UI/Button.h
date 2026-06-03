@@ -8,15 +8,18 @@ class Button: public IMovable
 {
 private:
 	sf::Sprite m_sprite;
-	//sf::Text m_text;
-	std::string m_label;
+	sf::Texture m_textureIdle;
+	sf::Texture m_textureHighlighted;
 
+	std::string m_label;
 	//opt для кнопок help и bigint
 	std::optional<sf::Text> m_text;
 
 	sf::Color textColor = sf::Color(99,155,255);
 
 	std::function<void()> onClick;
+
+	bool isHovered;
 
 public:
 
