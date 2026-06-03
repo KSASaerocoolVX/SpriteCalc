@@ -33,10 +33,16 @@ CalculatorUI::CalculatorUI(sf::Vector2f position) : m_sprite(m_texture)
 	float texHeight = static_cast<float>(textureSize.y);
 
 	float offsetY = texHeight * 0.4f;
-	float offsetX = texWidth * 0.2f;
+	float offsetX = texWidth * 0.1f;
 
 	float paddingX = texWidth * 0.1f;
 	float paddingY = texHeight * 0.1f;
+
+	for (int i = 0; i < 20; i++)
+	{
+		auto pos = sf::Vector2f(10*i,10*i);
+		buttonPositions.emplace_back(pos, m_buttonTexture);
+	}
 
 	//buttonPositions.emplace_back(sf::Vector2f(0, 0));
 	//buttonPositions.emplace_back(sf::Vector2f(1, 0));

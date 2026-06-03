@@ -13,12 +13,15 @@ struct Config
 	
 	bool enableBg = false;
 
-	string bgShaderPath = "UI/shaders/bg.frag";
+	string bgShaderPath = "UI/shaders/bg_checker.frag";
 };
 
 float easeInOutCubic(float x) {
     return x < 0.5 ? 4 * x * x * x : 1 - std::pow(-2 * x + 2, 3) / 2;
 }
+
+//todo за это должен отвечать отдельный класс
+string buffer = "";
 
 bool enable_bg = false;
 
