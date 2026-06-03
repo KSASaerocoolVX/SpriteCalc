@@ -38,7 +38,11 @@ CalculatorUI::CalculatorUI(sf::Vector2f position) : m_sprite(m_texture)
 	}
 	m_sprite.setTexture(m_texture, true);
 
-	if (!m_buttonTexture.loadFromFile("UI/assets/button_0.png")) {
+	if (!m_buttonIdleTexture.loadFromFile("UI/assets/button_0.png")) {
+		std::cerr << "failed to load button texture" << std::endl;
+	}
+
+	if (!m_buttonHoverTexture.loadFromFile("UI/assets/button_1.png")) {
 		std::cerr << "failed to load button texture" << std::endl;
 	}
 
@@ -59,8 +63,8 @@ CalculatorUI::CalculatorUI(sf::Vector2f position) : m_sprite(m_texture)
 	m_sprite.setScale(sf::Vector2f(1.0f, 1.0f));
 
 	//bigint info buttons
-	children.push_back(std::make_unique<Button>(sf::Vector2f(0, 0), m_infoTexture));
-	children.push_back(std::make_unique<Button>(sf::Vector2f(textureSize.x - m_bigIntTexture.getSize().x, 0), m_bigIntTexture));
+	children.push_back(std::make_unique<Button>(sf::Vector2f(0, 0), m_infoTexture,m_infoTexture));
+	children.push_back(std::make_unique<Button>(sf::Vector2f(textureSize.x - m_bigIntTexture.getSize().x, 0), m_bigIntTexture,m_bigIntTexture));
 
 	//main buttons
 
@@ -77,12 +81,12 @@ CalculatorUI::CalculatorUI(sf::Vector2f position) : m_sprite(m_texture)
 	{
 		for (int j = 0; j < 4; j++)
 		{
-			float stepX = (m_buttonTexture.getSize().x + paddingX) * j;
-			float stepY = ((m_buttonTexture.getSize().y + paddingY) * i);
+			float stepX = (m_buttonIdleTexture.getSize().x + paddingX) * j;
+			float stepY = ((m_buttonIdleTexture.getSize().y + paddingY) * i);
 			auto pos = sf::Vector2f(offsetX+ stepX,offsetY + stepY);
 
 			std::string label = intToLabel((i * 4) + j);
-			children.push_back(std::make_unique<Button>(pos, m_buttonTexture, m_font, label));
+			children.push_back(std::make_unique<Button>(pos, m_buttonIdleTexture,m_buttonHoverTexture, m_font, label));
 		}
 	}
 

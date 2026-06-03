@@ -8,8 +8,10 @@ class Button: public IMovable
 {
 private:
 	sf::Sprite m_sprite;
-	sf::Texture m_textureIdle;
-	sf::Texture m_textureHighlighted;
+	const sf::Texture* m_idleTexture;
+	const sf::Texture* m_hoverTexture;
+
+	bool isHovered=false;
 
 	std::string m_label;
 	//opt для кнопок help и bigint
@@ -19,13 +21,12 @@ private:
 
 	std::function<void()> onClick;
 
-	bool isHovered;
 
 public:
 
-	Button(sf::Vector2f position, const sf::Texture& texture, const sf::Font& font, const std::string& label);
+	Button(sf::Vector2f position, const sf::Texture& idleTexture, const sf::Texture& hoverTexture, const sf::Font& font, const std::string& label);
 
-	Button(sf::Vector2f position, const sf::Texture& texture);
+	Button(sf::Vector2f position, const sf::Texture& idleTexture, const sf::Texture& hoverTexture);
 
 	void Draw(sf::RenderWindow &window);
 

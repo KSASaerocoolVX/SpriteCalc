@@ -2,20 +2,24 @@
 #include "Button.h"
 #include <iostream>
 
-Button::Button(sf::Vector2f position, const sf::Texture& texture, const sf::Font& font, const std::string& label): m_sprite(texture), m_text(font), m_label(label)
+Button::Button(sf::Vector2f position, const sf::Texture& idleTexture, const sf::Texture& hoverTexture, const sf::Font& font, const std::string& label): m_sprite(idleTexture), m_text(font), m_label(label)
 {
+	m_idleTexture = &idleTexture;
+	m_hoverTexture = &hoverTexture;
+
+
 	onClick = [this]() {
 		this->PrintLabel();
 	};
 
-	sf::Vector2u textureSize = texture.getSize();
+	sf::Vector2u textureSize = idleTexture.getSize();
 
 	//m_sprite.setOrigin(sf::Vector2f(textureSize.x / 2.0f, textureSize.y / 2.0f));
 
 	m_sprite.setPosition(position);
 
 	m_text->setString(m_label);
-	m_text->setCharacterSize(16);
+	m_text->setCharacterSize(14);
 	m_text->setFillColor(textColor);
 
 	sf::FloatRect bounds = m_text->getLocalBounds();
@@ -29,15 +33,16 @@ Button::Button(sf::Vector2f position, const sf::Texture& texture, const sf::Font
 
 }
 
-Button::Button(sf::Vector2f position, const sf::Texture& texture) : m_sprite(texture)
+Button::Button(sf::Vector2f position, const sf::Texture& idleTexture, const sf::Texture& hoverTexture) : m_sprite(idleTexture)
 {
+	m_idleTexture = &idleTexture;
+	m_hoverTexture = &hoverTexture;
+
 	m_sprite.setPosition(position);
 }
 
 void Button::Draw(sf::RenderWindow& window)
 {
-
-
 	auto mousePos = sf::Mouse::getPosition(window);
 
 	sf::Vector2f mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
@@ -50,7 +55,11 @@ void Button::Draw(sf::RenderWindow& window)
 
 	if (isHovered)
 	{
-		std::cout << m_label << std::endl;
+		m_sprite.setTexture(*m_hoverTexture);
+	}
+	else
+	{
+		m_sprite.setTexture(*m_idleTexture);
 	}
 
 	window.draw(m_sprite);

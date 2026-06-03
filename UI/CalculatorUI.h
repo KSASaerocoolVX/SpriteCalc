@@ -7,7 +7,8 @@ class CalculatorUI: public IMovable
 {
 private:
     sf::Texture m_texture;
-    sf::Texture m_buttonTexture;
+    sf::Texture m_buttonIdleTexture;
+    sf::Texture m_buttonHoverTexture;
     sf::Texture m_infoTexture;
     sf::Texture m_bigIntTexture;
 
