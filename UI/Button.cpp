@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include "Button.h"
 #include <iostream>
+#include "InputScreen.h"
 
 Button::Button(sf::Vector2f localPosition, const sf::Texture& idleTexture, const sf::Texture& hoverTexture, const sf::Font& font, const std::string& label): m_sprite(idleTexture), m_text(font), m_label(label)
 {
@@ -83,6 +84,8 @@ void Button::UpdateTransform(sf::Vector2f parentPosition, sf::Vector2f parentSca
 		m_text->setScale(sf::Vector2f(textScaleX, textScaleY));
 	}
 }
+
+
 
 
 void Button::PrintLabel()

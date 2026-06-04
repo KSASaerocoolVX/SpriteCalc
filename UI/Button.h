@@ -30,7 +30,7 @@ public:
 
 	Button(sf::Vector2f position, const sf::Texture& idleTexture, const sf::Texture& hoverTexture);
 
-	void Draw(sf::RenderWindow &window);
+	virtual void Draw(sf::RenderWindow &window);
 
 	virtual void UpdateTransform(sf::Vector2f parentPosition, sf::Vector2f parentScale);
 
