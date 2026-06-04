@@ -1,6 +1,7 @@
 #include "CalculatorUI.h"
 #include <iostream>
 #include <string>
+#include "InputScreen.h"
 
 std::string intToLabel(int index)
 {
@@ -33,7 +34,7 @@ std::string intToLabel(int index)
 
 CalculatorUI::CalculatorUI(sf::Vector2f position) : m_sprite(m_texture)
 {
-	if (!m_texture.loadFromFile("UI/assets/calculator_ostov.png")) {
+	if (!m_texture.loadFromFile("UI/assets/calculator_empty.png")) {
 		std::cerr << "failed to load calculator texture" << std::endl;
 	}
 	m_sprite.setTexture(m_texture, true);
@@ -60,6 +61,10 @@ CalculatorUI::CalculatorUI(sf::Vector2f position) : m_sprite(m_texture)
 
 	if (!m_font.openFromFile("UI/assets/RetroGaming.ttf")) {
 		std::cerr << "failed to load bigIntButton texture" << std::endl;
+	}
+
+	if (!m_inputScreenTexture.loadFromFile("UI/assets/input_screen.png")) {
+		std::cerr << "failed to load input screen texture" << std::endl;
 	}
 
 	sf::Vector2u textureSize = m_texture.getSize();
@@ -93,6 +98,13 @@ CalculatorUI::CalculatorUI(sf::Vector2f position) : m_sprite(m_texture)
 			children.push_back(std::make_unique<Button>(localPosition, m_buttonIdleTexture,m_buttonHoverTexture, m_font, label));
 		}
 	}
+
+	//экран
+	float screenOffsetY = texHeight * 0.1f;
+	float screenOffsetX = texWidth * 0.08f;
+	auto screenPos = sf::Vector2f(screenOffsetX, screenOffsetY);
+
+	children.push_back(std::make_unique<InputScreen>(screenPos, m_inputScreenTexture, m_font));
 }
 
 void CalculatorUI::UpdateTransform(sf::Vector2f position, sf::Vector2f scale)
