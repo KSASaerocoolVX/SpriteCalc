@@ -21,7 +21,8 @@ float easeInOutCubic(float x) {
 }
 
 //todo за это должен отвечать отдельный класс
-string buffer = "";
+string buffer = "smth";
+string answerBuffer = "3";
 
 bool enable_bg = false;
 
@@ -32,7 +33,7 @@ int main()
 	float width = config.windowWidth;
 	float height = config.windowHeight;
 
-	sf::Vector2 windowCenter = sf::Vector2f(width/2,height/2);
+	sf::Vector2 windowCenter = sf::Vector2f(width/2 - 200,height/2 - 300);
 
 	sf::RenderWindow window(sf::VideoMode({ 800, 800 }), "SpriteCalc");
 
@@ -67,12 +68,16 @@ int main()
 
 			}
 		}
-		sf::Vector2i mousePos = sf::Mouse::getPosition();
-		//cout << "Mouse" << mousePos.x << "---" << mousePos.y << endl;
+		sf::Vector2f mousePos(
+			static_cast<float>(sf::Mouse::getPosition(window).x),
+			static_cast<float>(sf::Mouse::getPosition(window).y)
+		);
 
 		window.clear();
 		bg.Draw(window, totalTime);
 		calculator.Draw(window);
+		calculator.SetPosition(windowCenter);
+		calculator.SetScale(sf::Vector2f(3.0f ,3.0f));
 		window.display();
 	}
 }

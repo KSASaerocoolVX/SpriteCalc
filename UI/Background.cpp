@@ -15,7 +15,7 @@
 		window.draw(m_shape, &m_shader);
 	}
 
-	//todo если шейдер зависит от времени
+	//если шейдер зависит от времени
 	void Background::Draw(sf::RenderWindow& window, float totalTime)
 	{
 		m_shader.setUniform("iTime", totalTime);

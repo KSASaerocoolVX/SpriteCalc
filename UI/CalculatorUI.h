@@ -11,6 +11,7 @@ private:
     sf::Texture m_buttonHoverTexture;
     sf::Texture m_infoTexture;
     sf::Texture m_bigIntTexture;
+    sf::Texture m_inputScreenTexture;
 
     sf::Sprite m_sprite;
     sf::Font m_font;
@@ -20,7 +21,8 @@ public:
 
     virtual void Draw(sf::RenderWindow& window);
 
-    virtual void Move(sf::Vector2f targetPosition);
+    virtual void UpdateTransform(sf::Vector2f targetPosition, sf::Vector2f targetScale);
 
-    virtual void Scale(sf::Vector2f targetScale);
+    void SetPosition(sf::Vector2f targetPosition);
+    void SetScale(sf::Vector2f targetScale);
 };

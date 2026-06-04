@@ -21,6 +21,8 @@ private:
 
 	std::function<void()> onClick;
 
+	sf::Vector2f m_localPosition;
+
 
 public:
 
@@ -30,9 +32,7 @@ public:
 
 	void Draw(sf::RenderWindow &window);
 
-	virtual void Move(sf::Vector2f targetPosition);
-
-	virtual void Scale(sf::Vector2f targetScale);
+	virtual void UpdateTransform(sf::Vector2f parentPosition, sf::Vector2f parentScale);
 
 	void PrintLabel();
 };
