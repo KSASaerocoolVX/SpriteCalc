@@ -35,6 +35,10 @@ struct Token {
 class Lexer {
 public:
     [[nodiscard]] std::vector<Token> tokenize(std::string_view input) const {
+        if (const auto latexPolynomial = tokenizeWholeLatexPolynomial(input); !latexPolynomial.empty()) {
+            return latexPolynomial;
+        }
+
         std::vector<Token> tokens;
         std::size_t index = 0;
 
@@ -48,6 +52,11 @@ public:
 
             if (std::isdigit(static_cast<unsigned char>(current)) || current == '.') {
                 tokens.push_back(readNumber(input, index));
+                continue;
+            }
+
+            if (current == '\\') {
+                tokens.push_back(readLatex(input, index));
                 continue;
             }
 
@@ -103,6 +112,39 @@ public:
     }
 
 private:
+    [[nodiscard]] std::vector<Token> tokenizeWholeLatexPolynomial(std::string_view input) const {
+        const auto trimmed = trim(input);
+        if (trimmed.empty()) {
+            return {};
+        }
+
+        const auto equals = trimmed.find('=');
+        if (equals != std::string_view::npos) {
+            const auto name = trim(trimmed.substr(0, equals));
+            const auto polynomial = trim(trimmed.substr(equals + 1));
+
+            if (!isIdentifier(name) || !looksLikeLatexPolynomial(polynomial)) {
+                return {};
+            }
+
+            return {
+                {TokenKind::Identifier, name},
+                {TokenKind::Equal, "="},
+                {TokenKind::Polynomial, polynomial},
+                {TokenKind::End, ""}
+            };
+        }
+
+        if (!looksLikeLatexPolynomial(trimmed)) {
+            return {};
+        }
+
+        return {
+            {TokenKind::Polynomial, trimmed},
+            {TokenKind::End, ""}
+        };
+    }
+
     [[nodiscard]] std::string_view trim(std::string_view text) const {
         const auto first = text.find_first_not_of(" \t\r\n");
         if (first == std::string_view::npos) {
@@ -130,6 +172,33 @@ private:
         }
 
         return true;
+    }
+
+    [[nodiscard]] bool looksLikeLatexPolynomial(std::string_view text) const {
+        if (text.starts_with("\\poly{")) {
+            return true;
+        }
+
+        bool hasX = false;
+        for (const auto ch : text) {
+            if (ch == 'x') {
+                hasX = true;
+                continue;
+            }
+
+            if (
+                std::isdigit(static_cast<unsigned char>(ch)) ||
+                std::isspace(static_cast<unsigned char>(ch)) ||
+                ch == '+' || ch == '-' || ch == '.' || ch == '*' ||
+                ch == '/' || ch == '^' || ch == '{' || ch == '}'
+            ) {
+                continue;
+            }
+
+            return false;
+        }
+
+        return hasX;
     }
 
     [[nodiscard]] Token readNumber(std::string_view input, std::size_t& index) const {
@@ -165,13 +234,86 @@ private:
     }
 
     [[nodiscard]] Token readMatrix(std::string_view input, std::size_t& index) const {
-        // Заглушка: обработка обычных матриц отключена
-        throw core::SyntaxError("Matrix literals are not supported yet");
+        const auto start = index;
+        ++index;
+
+        while (index < input.size() && input[index] != ']') {
+            ++index;
+        }
+
+        if (index >= input.size()) {
+            throw core::SyntaxError("unclosed matrix literal");
+        }
+
+        ++index;
+        return {TokenKind::Matrix, input.substr(start, index - start)};
+    }
+
+    [[nodiscard]] Token readLatex(std::string_view input, std::size_t& index) const {
+        if (input.substr(index).starts_with("\\begin{")) {
+            return readLatexMatrix(input, index);
+        }
+
+        if (input.substr(index).starts_with("\\poly{")) {
+            return readLatexPolynomial(input, index);
+        }
+
+        throw core::SyntaxError("unsupported LaTeX command");
+    }
+
+    [[nodiscard]] Token readLatexMatrix(std::string_view input, std::size_t& index) const {
+        const auto start = index;
+        const auto beginClose = input.find('}', index + 7);
+        if (beginClose == std::string_view::npos) {
+            throw core::SyntaxError("invalid LaTeX matrix begin");
+        }
+
+        const auto environment = input.substr(index + 7, beginClose - (index + 7));
+        const auto endTag = "\\end{" + std::string{environment} + "}";
+        const auto end = input.find(endTag, beginClose + 1);
+        if (end == std::string_view::npos) {
+            throw core::SyntaxError("unclosed LaTeX matrix literal");
+        }
+
+        index = end + endTag.size();
+        return {TokenKind::Matrix, input.substr(start, index - start)};
+    }
+
+    [[nodiscard]] Token readLatexPolynomial(std::string_view input, std::size_t& index) const {
+        const auto start = index;
+        index += 6;
+        int depth = 1;
+
+        while (index < input.size() && depth > 0) {
+            if (input[index] == '{') {
+                ++depth;
+            } else if (input[index] == '}') {
+                --depth;
+            }
+            ++index;
+        }
+
+        if (depth != 0) {
+            throw core::SyntaxError("unclosed LaTeX polynomial literal");
+        }
+
+        return {TokenKind::Polynomial, input.substr(start, index - start)};
     }
 
     [[nodiscard]] Token readPolynomial(std::string_view input, std::size_t& index) const {
-        // Заглушка: обработка обычных полиномов отключена
-        throw core::SyntaxError("Polynomial literals are not supported yet");
+        const auto start = index;
+        ++index;
+
+        while (index < input.size() && input[index] != '}') {
+            ++index;
+        }
+
+        if (index >= input.size()) {
+            throw core::SyntaxError("unclosed polynomial literal");
+        }
+
+        ++index;
+        return {TokenKind::Polynomial, input.substr(start, index - start)};
     }
 
     [[nodiscard]] Token readIdentifier(std::string_view input, std::size_t& index) const {
