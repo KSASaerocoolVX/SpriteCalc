@@ -23,8 +23,6 @@ Button::Button(sf::Vector2f localPosition, const sf::Texture& idleTexture, const
 	m_text->setScale(sf::Vector2f(0.25f, 0.25f));
 	m_text->setFillColor(textColor);
 
-	sf::FloatRect bounds = m_text->getLocalBounds();
-
 	m_text->setPosition(localPosition);
 }
 

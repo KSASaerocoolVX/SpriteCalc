@@ -12,9 +12,10 @@ private:
 	bool isHovered = false;
 
 	std::string m_label;
-	std::optional<sf::Text> m_text;
+	std::optional<sf::Text> m_inputText;
+	std::optional<sf::Text> m_outputText;
 
-	sf::Color textColor = sf::Color(99, 155, 255);
+	sf::Color textColor = sf::Color(75,105,47);
 
 	std::function<void()> onClick;
 
