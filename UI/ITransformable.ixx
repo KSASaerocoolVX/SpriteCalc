@@ -1,5 +1,10 @@
-#pragma once
-class ITransformable
+module;
+
+#include <SFML/Graphics.hpp>
+
+export module ITransformable;
+
+export class ITransformable
 {
 public:
     virtual ~ITransformable() {}

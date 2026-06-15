@@ -1,7 +1,11 @@
+module;
 #include <SFML/Graphics.hpp>
-#include "Button.h"
 #include <iostream>
-#include "InputScreen.h"
+#include <string>
+#include <cmath>
+
+module Button;
+import InputScreen;
 
 Button::Button(sf::Vector2f localPosition, const sf::Texture& idleTexture, const sf::Texture& hoverTexture, const sf::Font& font, const std::string& label): m_sprite(idleTexture), m_text(font), m_label(label)
 {

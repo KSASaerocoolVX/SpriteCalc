@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.28)
 project(AsciCalc CXX)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -21,26 +21,26 @@ add_executable(AsciCalc
     "UI/layout/TextNode.cpp"
 )
 
-target_sources(AsciCalc PRIVATE
-    "UI/Background.h"
-    "UI/Button.h"
-    "UI/CalculatorUI.h"
-    "UI/CalculatorUITab.h"
-    "UI/ITransformable.h"
-    "UI/InputScreen.h"
-    "UI/layout/IMathNode.h"
-    "UI/layout/TextNode.h"
-)
-
 target_sources(AsciCalc
     PRIVATE
     FILE_SET CXX_MODULES FILES
+    
     "src/core/context.ixx"
     "src/core/exceptions.ixx"
     "src/core/value.ixx"
     "src/math/rational.ixx"
     "src/parser/core.ixx"
     "src/parser/lexer.ixx"
+    
+    "UI/ITransformable.ixx"
+    "UI/Background.ixx"
+    "UI/Button.ixx"
+    "UI/InputScreen.ixx"
+    "UI/CalculatorUI.ixx"
+    "UI/CalculatorUITab.ixx"
+    
+    "UI/layout/IMathNode.ixx"
+    "UI/layout/TextNode.ixx"
 )
 
 

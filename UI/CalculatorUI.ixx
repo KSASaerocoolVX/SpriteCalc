@@ -1,9 +1,16 @@
+module;
+
 #include <SFML/Graphics.hpp>
-#include "Button.h"
-#include "ITransformable.h"
+#include <vector>
+#include <memory>
 
+export module CalculatorUI;
 
-class CalculatorUI: public ITransformable
+import ITransformable;
+import Button;
+import InputScreen;
+
+export class CalculatorUI : public ITransformable
 {
 private:
     sf::Texture m_texture;
@@ -16,6 +23,7 @@ private:
     sf::Sprite m_sprite;
     sf::Font m_font;
     std::vector<std::unique_ptr<ITransformable>> children;
+
 public:
     CalculatorUI(sf::Vector2f position);
 

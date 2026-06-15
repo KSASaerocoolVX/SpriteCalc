@@ -130,4 +130,8 @@ private:
     return !(left < right);
 }
 
+//todo это заменить
+[[nodiscard]] Rational parseRationalLiteral(const std::string& text) { return Rational(0); }
+
+
 }

@@ -1,7 +1,11 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
-#include "Background.h"
-#include "CalculatorUI.h"
+#include <string>
+#include <cmath>
+
+import Background;
+import CalculatorUI;
+
 using namespace std;
 
 //main потом будет перемещем из Ui

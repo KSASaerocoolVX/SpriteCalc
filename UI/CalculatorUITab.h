@@ -1,4 +1,0 @@
-class CalculatorUITab : IMovable
-{
-
-};

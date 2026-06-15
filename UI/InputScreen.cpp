@@ -1,5 +1,10 @@
-#include "InputScreen.h"
+module;
 
+#include <SFML/Graphics.hpp> 
+#include <string>
+#include <cmath>
+
+module InputScreen;
 
 InputScreen::InputScreen(sf::Vector2f localPosition, const sf::Texture& texture, const sf::Font& font): m_sprite(texture), m_inputText(font), m_outputText(font)
 {

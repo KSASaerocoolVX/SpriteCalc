@@ -1,7 +1,17 @@
-#include "CalculatorUI.h"
+module;
+
 #include <iostream>
 #include <string>
-#include "InputScreen.h"
+#include <SFML/Graphics.hpp> 
+#include <string>
+#include <cmath>
+#include <memory>
+
+module CalculatorUI;
+
+import InputScreen;
+
+
 
 std::string intToLabel(int index)
 {
