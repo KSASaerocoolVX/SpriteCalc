@@ -14,10 +14,6 @@ Button::Button(sf::Vector2f localPosition, const sf::Texture& idleTexture, const
 
 	m_localPosition = localPosition;
 
-	onClick = [this]() {
-		this->PrintLabel();
-	};
-
 	sf::Vector2u textureSize = idleTexture.getSize();
 
 	m_sprite.setPosition(localPosition);
@@ -87,7 +83,21 @@ void Button::UpdateTransform(sf::Vector2f parentPosition, sf::Vector2f parentSca
 	}
 }
 
+void Button::HandleEvent(const sf::Event& event, const sf::RenderWindow& window)
+{
+	if (const auto* mouseClick = event.getIf<sf::Event::MouseButtonReleased>())
+	{
+		sf::Vector2f mousePos = window.mapPixelToCoords(mouseClick->position);
 
+		if (m_sprite.getGlobalBounds().contains(mousePos))
+		{
+			if (onClick) {
+				onClick();
+				std::cout << "smth" << std::endl;
+			}
+		}
+	}
+}
 
 
 void Button::PrintLabel()

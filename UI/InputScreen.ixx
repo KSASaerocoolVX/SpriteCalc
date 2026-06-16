@@ -8,30 +8,24 @@ module;
 export module InputScreen;
 
 import ITransformable;
+import IMathNode;
 
 export class InputScreen : public ITransformable
 {
 private:
     sf::Sprite m_sprite;
-
-    bool isHovered = false;
-
-    std::string m_label;
-    std::optional<sf::Text> m_inputText;
-    std::optional<sf::Text> m_outputText;
-
-    sf::Color textColor = sf::Color(75, 105, 47);
-
-    std::function<void()> onClick;
-
     sf::Vector2f m_localPosition;
 
+    std::unique_ptr<IMathNode> m_expression;
+
+
 public:
-    InputScreen(sf::Vector2f position, const sf::Texture& texture, const sf::Font& font);
+    InputScreen(sf::Vector2f position, const sf::Texture& texture);
 
-    virtual void Draw(sf::RenderWindow& window);
+    void SetExpression(std::unique_ptr<IMathNode> newExpression);
 
-    virtual void UpdateTransform(sf::Vector2f parentPosition, sf::Vector2f parentScale);
+    virtual void Draw(sf::RenderWindow& window) override;
+    virtual void UpdateTransform(sf::Vector2f parentPosition, sf::Vector2f parentScale) override;
+    virtual void HandleEvent(const sf::Event& event, const sf::RenderWindow& window) override;
 
-    void PrintLabel();
 };

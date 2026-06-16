@@ -24,10 +24,17 @@ private:
     sf::Font m_font;
     std::vector<std::unique_ptr<ITransformable>> children;
 
+    std::string m_inputBuffer;
+    InputScreen* m_screenRef = nullptr; 
+
+    void HandleButtonPress(const std::string& label);
+
 public:
     CalculatorUI(sf::Vector2f position);
 
     virtual void Draw(sf::RenderWindow& window);
+
+    virtual void HandleEvent(const sf::Event& event, const sf::RenderWindow& window) override;
 
     virtual void UpdateTransform(sf::Vector2f targetPosition, sf::Vector2f targetScale);
 

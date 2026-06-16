@@ -6,6 +6,7 @@ module;
 
 module TextNode;
 
+//
 TextNode::TextNode(const std::string& text, const sf::Font& font, unsigned int charSize): m_text(font)
 {
     m_text.setString(text);
@@ -44,4 +45,8 @@ void TextNode::UpdateTransform(sf::Vector2f parentPosition, sf::Vector2f parentS
 void TextNode::Draw(sf::RenderWindow& window)
 {
     window.draw(m_text);
+}
+
+void TextNode::HandleEvent(const sf::Event& event, const sf::RenderWindow& window)
+{
 }

@@ -71,6 +71,7 @@ int main()
 					window.close();
 
 			}
+			calculator.HandleEvent(*event, window);
 		}
 		sf::Vector2f mousePos(
 			static_cast<float>(sf::Mouse::getPosition(window).x),

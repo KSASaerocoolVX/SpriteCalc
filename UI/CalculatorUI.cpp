@@ -10,6 +10,7 @@ module;
 module CalculatorUI;
 
 import InputScreen;
+import TextNode;
 
 
 
@@ -102,10 +103,17 @@ CalculatorUI::CalculatorUI(sf::Vector2f position) : m_sprite(m_texture)
 		{
 			float stepX = (m_buttonIdleTexture.getSize().x + paddingX) * j;
 			float stepY = ((m_buttonIdleTexture.getSize().y + paddingY) * i);
-			auto localPosition = sf::Vector2f(offsetX+ stepX,offsetY + stepY);
+			auto localPosition = sf::Vector2f(offsetX + stepX, offsetY + stepY);
 
 			std::string label = intToLabel((i * 4) + j);
-			children.push_back(std::make_unique<Button>(localPosition, m_buttonIdleTexture,m_buttonHoverTexture, m_font, label));
+
+			auto btn = std::make_unique<Button>(localPosition, m_buttonIdleTexture, m_buttonHoverTexture, m_font, label);
+
+			btn->onClick = [this, label]() {
+				this->HandleButtonPress(label);
+				};
+
+			children.push_back(std::move(btn));
 		}
 	}
 
@@ -114,7 +122,37 @@ CalculatorUI::CalculatorUI(sf::Vector2f position) : m_sprite(m_texture)
 	float screenOffsetX = texWidth * 0.08f;
 	auto screenPos = sf::Vector2f(screenOffsetX, screenOffsetY);
 
-	children.push_back(std::make_unique<InputScreen>(screenPos, m_inputScreenTexture, m_font));
+	auto screen = std::make_unique<InputScreen>(screenPos, m_inputScreenTexture);
+	m_screenRef = screen.get();
+
+	//m_screenRef->SetInputText("");
+	//m_screenRef->SetOutputText("");
+
+	children.push_back(std::move(screen));
+}
+
+void CalculatorUI::HandleButtonPress(const std::string& label)
+{
+	if (label == "AC") {
+		m_inputBuffer.clear(); 
+	}
+	else if (label == "=") {
+		//todo на потом
+		//parser.parse(m_inputBuffer).evaluate();
+	}
+	else if (label != "P" && label != "?") {
+		m_inputBuffer += label;
+	}
+
+	if (m_screenRef) {
+		auto mathNodes = std::make_unique<TextNode>(m_inputBuffer, m_font);
+
+		m_screenRef->SetExpression(std::move(mathNodes));
+
+		m_screenRef->UpdateTransform(m_sprite.getPosition(), m_sprite.getScale());
+	}
+
+	std::cout << "buffer: \"" << m_inputBuffer << "\"\n";
 }
 
 void CalculatorUI::UpdateTransform(sf::Vector2f position, sf::Vector2f scale)
@@ -152,5 +190,13 @@ void CalculatorUI::Draw(sf::RenderWindow& window)
 	for (auto& button : children)
 	{
 		button->Draw(window);
+	}
+}
+
+void CalculatorUI::HandleEvent(const sf::Event& event, const sf::RenderWindow& window)
+{
+	for (auto& child : children)
+	{
+		child->HandleEvent(event, window);
 	}
 }

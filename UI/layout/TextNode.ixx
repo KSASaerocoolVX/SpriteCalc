@@ -22,4 +22,6 @@ public:
 
     void UpdateTransform(sf::Vector2f parentPosition, sf::Vector2f parentScale) override;
     void Draw(sf::RenderWindow& window) override;
+
+    void HandleEvent(const sf::Event& event, const sf::RenderWindow& window) override;
 };

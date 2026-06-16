@@ -24,11 +24,11 @@ private:
 
     sf::Color textColor = sf::Color(99, 155, 255);
 
-    std::function<void()> onClick;
 
     sf::Vector2f m_localPosition;
 
 public:
+    std::function<void()> onClick;
     Button(sf::Vector2f position, const sf::Texture& idleTexture, const sf::Texture& hoverTexture, const sf::Font& font, const std::string& label);
 
     Button(sf::Vector2f position, const sf::Texture& idleTexture, const sf::Texture& hoverTexture);
@@ -36,6 +36,8 @@ public:
     virtual void Draw(sf::RenderWindow& window);
 
     virtual void UpdateTransform(sf::Vector2f parentPosition, sf::Vector2f parentScale);
+
+    void HandleEvent(const sf::Event& event, const sf::RenderWindow& window) override;
 
     void PrintLabel();
 };
