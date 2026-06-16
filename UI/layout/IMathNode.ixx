@@ -1,9 +1,9 @@
 module;
+
 #include <SFML/Graphics.hpp>
 
-
 export module IMathNode;
-import ITransformable;
+import UIElement;
 
 export struct MathMetrics {
     float width;
@@ -11,10 +11,12 @@ export struct MathMetrics {
     float baselineY;
 };
 
-export class IMathNode : public ITransformable
+export class IMathNode : public UIElement
 {
 public:
+    MathMetrics m_metrics;
+
     virtual ~IMathNode() = default;
     virtual MathMetrics Measure() = 0;
-    virtual void Arrange(sf::Vector2f position) = 0;
+    virtual void Arrange() = 0;
 };

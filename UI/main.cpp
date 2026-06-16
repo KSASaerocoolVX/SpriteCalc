@@ -34,30 +34,28 @@ int main()
 {
 	Config config;
 
+	sf::RenderWindow window(sf::VideoMode({config.windowWidth,config.windowHeight}),"SpriteCalc");
 	float width = config.windowWidth;
 	float height = config.windowHeight;
 
 	sf::Vector2 windowCenter = sf::Vector2f(width/2 - 200,height/2 - 300);
 
-	sf::RenderWindow window(sf::VideoMode({ 800, 800 }), "SpriteCalc");
-
-	//bg
 	Background bg(width,height,config.bgShaderPath);
 
-	//calculator
-	//принимает только расположение
-	CalculatorUI calculator(windowCenter);
+	CalculatorUI calculator;
+
+	calculator.setPosition(windowCenter);
+	calculator.setScale(sf::Vector2f(1.0f, 1.0f));
 
 	sf::Clock clock;
 	float totalTime = 0.f;
 
 	while (window.isOpen())
 	{
-		sf::Time elasped = clock.restart();
-		float deltaTime = elasped.asSeconds();
+		float deltaTime = clock.restart().asSeconds();
 		totalTime += deltaTime;
 
-		bg.Draw(window);
+		sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
 		while (const std::optional event = window.pollEvent())
 		{
@@ -65,25 +63,17 @@ int main()
 			{
 				window.close();
 			}
-			else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
-			{
-				if (keyPressed->scancode == sf::Keyboard::Scancode::Escape)
-					window.close();
 
-			}
-			calculator.HandleEvent(*event, window);
+				calculator.HandleEvent(*event, window);
 		}
-		sf::Vector2f mousePos(
-			static_cast<float>(sf::Mouse::getPosition(window).x),
-			static_cast<float>(sf::Mouse::getPosition(window).y)
-		);
+		calculator.Update(deltaTime,mousePos);
 
 		window.clear();
 		bg.Draw(window, totalTime);
-		calculator.Draw(window);
-		calculator.SetPosition(windowCenter);
-		calculator.SetScale(sf::Vector2f(3.0f ,3.0f));
+
+		window.draw(calculator);
+
 		window.display();
+		}
 	}
-}
 

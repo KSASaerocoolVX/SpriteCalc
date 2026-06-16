@@ -5,13 +5,17 @@ module;
 #include <cmath>
 
 module TextNode;
+import AssetManager;
 
 //
-TextNode::TextNode(const std::string& text, const sf::Font& font, unsigned int charSize): m_text(font)
+
+TextNode::TextNode(const std::string& text, unsigned int charSize) : m_text(AssetManager::Instance().GetFont("UI/assets/RetroGaming.ttf"))
 {
     m_text.setString(text);
     m_text.setCharacterSize(charSize);
     m_text.setFillColor(sf::Color(75, 105, 47));
+
+    m_text.setScale(sf::Vector2f(0.25f, 0.25f));
 }
 
 MathMetrics TextNode::Measure()
@@ -20,34 +24,17 @@ MathMetrics TextNode::Measure()
 
     m_metrics.width = bounds.size.x * 0.25f;
     m_metrics.height = bounds.size.y * 0.25f;
-
-    m_metrics.baselineY = bounds.size.y * 0.25f;
+    m_metrics.baselineY = m_metrics.height;
 
     return m_metrics;
 }
 
-void TextNode::Arrange(sf::Vector2f position)
+void TextNode::Arrange()
 {
-    m_localPosition = position;
 }
 
-void TextNode::UpdateTransform(sf::Vector2f parentPosition, sf::Vector2f parentScale)
+void TextNode::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-    float xPos = std::round(parentPosition.x + (m_localPosition.x * parentScale.x));
-    float yPos = std::round(parentPosition.y + (m_localPosition.y * parentScale.y));
-
-    m_text.setPosition(sf::Vector2f(xPos, yPos));
-
-    float scaleX = parentScale.x * 0.25f;
-    float scaleY = parentScale.y * 0.25f;
-    m_text.setScale(sf::Vector2f(scaleX, scaleY));
-}
-
-void TextNode::Draw(sf::RenderWindow& window)
-{
-    window.draw(m_text);
-}
-
-void TextNode::HandleEvent(const sf::Event& event, const sf::RenderWindow& window)
-{
+    states.transform *= getTransform();
+    target.draw(m_text, states);
 }
