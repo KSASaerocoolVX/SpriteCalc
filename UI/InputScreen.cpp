@@ -28,7 +28,8 @@ void InputScreen::SetExpression(std::unique_ptr<IMathNode> newExpression)
 void InputScreen::Update(float deltaTime, sf::Vector2f mousePos)
 {
 	if (m_expression) {
-		m_expression->Update(deltaTime, mousePos);
+		sf::Vector2f localMousePos = getInverseTransform().transformPoint(mousePos);
+		m_expression->Update(deltaTime, localMousePos);
 	}
 }
 

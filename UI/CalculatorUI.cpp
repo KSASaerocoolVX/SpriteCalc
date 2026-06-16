@@ -147,9 +147,12 @@ void CalculatorUI::HandleButtonPress(const std::string& label)
 
 void CalculatorUI::Update(float deltaTime, sf::Vector2f mousePos)
 {
+	sf::Vector2f localMousePos = getInverseTransform().transformPoint(mousePos);
 	for (auto& child : children)
 	{
-		child->Update(deltaTime, mousePos);
+		child->Update(deltaTime, localMousePos);
+		std::cout << localMousePos.x << " " << localMousePos.y << " Local mouse pos" << std::endl;
+		std::cout << mousePos.x << " " << mousePos.y << " Local mouse pos" << std::endl;
 	}
 }
 
