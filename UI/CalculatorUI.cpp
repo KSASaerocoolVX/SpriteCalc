@@ -11,6 +11,8 @@ module CalculatorUI;
 import InputScreen;
 import TextNode;
 import AssetManager;
+import MathRow;
+import FractionNode;
 
 
 
@@ -115,6 +117,8 @@ CalculatorUI::CalculatorUI() : m_sprite(AssetManager::Instance().GetTexture("UI/
 	auto screen = std::make_unique<InputScreen>(screenPos, "UI/assets/input_screen.png");
 	m_screenRef = screen.get();
 
+
+
 	children.push_back(std::move(screen));
 }
 
@@ -126,6 +130,22 @@ void CalculatorUI::HandleButtonPress(const std::string& label)
 	else if (label == "=") {
 		//todo на потом
 		//parser.parse(m_inputBuffer).evaluate();
+		auto mainRow = std::make_unique<MathRow>();
+
+		mainRow->AddChild(std::make_unique<TextNode>("X"));
+		mainRow->AddChild(std::make_unique<TextNode>(" + "));
+
+		auto numRow = std::make_unique<MathRow>();
+		numRow->AddChild(std::make_unique<TextNode>("3")); 
+
+		auto denRow = std::make_unique<MathRow>();
+		denRow->AddChild(std::make_unique<TextNode>("4"));
+
+		auto fraction = std::make_unique<FractionNode>(std::move(numRow), std::move(denRow));
+
+		mainRow->AddChild(std::move(fraction));
+
+		m_screenRef->SetInput(std::move(mainRow));
 	}
 	else if (label != "P" && label != "?") {
 		m_inputBuffer += label;

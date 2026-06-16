@@ -13,7 +13,7 @@ private:
     sf::Text m_text;
 
 public:
-    TextNode(const std::string& text, unsigned int charSize = 56);
+    TextNode(const std::string& text, unsigned int charSize = 56, sf::Color color = sf::Color(75,105,47));
 
     MathMetrics Measure() override;
     void Arrange() override;
