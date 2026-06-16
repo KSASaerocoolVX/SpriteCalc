@@ -11,6 +11,7 @@ module CalculatorUI;
 
 import InputScreen;
 import TextNode;
+import FractionNode;
 
 
 
@@ -145,9 +146,12 @@ void CalculatorUI::HandleButtonPress(const std::string& label)
 	}
 
 	if (m_screenRef) {
-		auto mathNodes = std::make_unique<TextNode>(m_inputBuffer, m_font);
+		auto topNode = std::make_unique<TextNode>("123", m_font);
+		auto botRow = std::make_unique<TextNode>("456",m_font);
 
-		m_screenRef->SetExpression(std::move(mathNodes));
+		auto fraction = std::make_unique<FractionNode>(std::move(topNode), std::move(botRow));
+
+		m_screenRef->SetExpression(std::move(fraction));
 
 		m_screenRef->UpdateTransform(m_sprite.getPosition(), m_sprite.getScale());
 	}

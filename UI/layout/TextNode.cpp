@@ -18,9 +18,10 @@ MathMetrics TextNode::Measure()
 {
     sf::FloatRect bounds = m_text.getLocalBounds();
 
-    m_metrics.width = bounds.size.x;
-    m_metrics.height = bounds.size.y;
-    m_metrics.baselineY = bounds.size.y;
+    m_metrics.width = bounds.size.x * 0.25f;
+    m_metrics.height = bounds.size.y * 0.25f;
+
+    m_metrics.baselineY = bounds.size.y * 0.25f;
 
     return m_metrics;
 }

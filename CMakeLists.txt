@@ -19,7 +19,7 @@ add_executable(AsciCalc
     "UI/CalculatorUI.cpp"
     "UI/InputScreen.cpp"
     "UI/layout/TextNode.cpp"
-)
+ "UI/layout/FractionNode.cpp")
 
 target_sources(AsciCalc
     PRIVATE
@@ -41,6 +41,7 @@ target_sources(AsciCalc
     
     "UI/layout/IMathNode.ixx"
     "UI/layout/TextNode.ixx"
+    "UI/layout/FractionNode.ixx"
 )
 
 
