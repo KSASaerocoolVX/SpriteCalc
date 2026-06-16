@@ -1,5 +1,12 @@
-#include "Background.h"
+module;
+
+#include <SFML/Graphics.hpp>
 #include <iostream>
+#include <SFML/Graphics.hpp> 
+#include <string>
+#include <cmath>
+
+module Background;
 
     Background::Background(unsigned int width, unsigned int height, const std::string& shaderPath): m_width(width), m_height(height)
     {

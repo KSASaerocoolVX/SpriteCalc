@@ -1,7 +1,11 @@
+module;
 #include <SFML/Graphics.hpp>
-#include "Button.h"
 #include <iostream>
-#include "InputScreen.h"
+#include <string>
+#include <cmath>
+
+module Button;
+import InputScreen;
 
 Button::Button(sf::Vector2f localPosition, const sf::Texture& idleTexture, const sf::Texture& hoverTexture, const sf::Font& font, const std::string& label): m_sprite(idleTexture), m_text(font), m_label(label)
 {
@@ -9,10 +13,6 @@ Button::Button(sf::Vector2f localPosition, const sf::Texture& idleTexture, const
 	m_hoverTexture = &hoverTexture;
 
 	m_localPosition = localPosition;
-
-	onClick = [this]() {
-		this->PrintLabel();
-	};
 
 	sf::Vector2u textureSize = idleTexture.getSize();
 
@@ -22,8 +22,6 @@ Button::Button(sf::Vector2f localPosition, const sf::Texture& idleTexture, const
 	m_text->setCharacterSize(56);
 	m_text->setScale(sf::Vector2f(0.25f, 0.25f));
 	m_text->setFillColor(textColor);
-
-	sf::FloatRect bounds = m_text->getLocalBounds();
 
 	m_text->setPosition(localPosition);
 }
@@ -85,7 +83,21 @@ void Button::UpdateTransform(sf::Vector2f parentPosition, sf::Vector2f parentSca
 	}
 }
 
+void Button::HandleEvent(const sf::Event& event, const sf::RenderWindow& window)
+{
+	if (const auto* mouseClick = event.getIf<sf::Event::MouseButtonReleased>())
+	{
+		sf::Vector2f mousePos = window.mapPixelToCoords(mouseClick->position);
 
+		if (m_sprite.getGlobalBounds().contains(mousePos))
+		{
+			if (onClick) {
+				onClick();
+				std::cout << "smth" << std::endl;
+			}
+		}
+	}
+}
 
 
 void Button::PrintLabel()

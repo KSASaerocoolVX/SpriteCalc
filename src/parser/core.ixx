@@ -457,7 +457,8 @@ private:
 
     [[nodiscard]] Instruction makeNumberInstruction(const std::string& text) const {
         // Парсим всё как Rational
-        return {InstructionKind::Number, text, core::Value{math::parseRationalLiteral(text)}};
+        //todo заменить
+        return { InstructionKind::Number, text, core::Value{} };
     }
 
     Lexer lexer_;

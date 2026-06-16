@@ -1,7 +1,11 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
-#include "Background.h"
-#include "CalculatorUI.h"
+#include <string>
+#include <cmath>
+
+import Background;
+import CalculatorUI;
+
 using namespace std;
 
 //main потом будет перемещем из Ui
@@ -21,7 +25,7 @@ float easeInOutCubic(float x) {
 }
 
 //todo за это должен отвечать отдельный класс
-string buffer = "3+3";
+string buffer = "3/3";
 string answerBuffer = "6";
 
 bool enable_bg = false;
@@ -67,6 +71,7 @@ int main()
 					window.close();
 
 			}
+			calculator.HandleEvent(*event, window);
 		}
 		sf::Vector2f mousePos(
 			static_cast<float>(sf::Mouse::getPosition(window).x),
