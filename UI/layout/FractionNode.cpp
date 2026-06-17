@@ -62,6 +62,13 @@ void FractionNode::HandleEvent(const sf::Event& event, const sf::RenderWindow& w
     if (m_denominator) m_denominator->HandleEvent(event, window);
 }
 
+std::string FractionNode::ToString() const {
+    std::string num = m_numerator ? m_numerator->ToString() : "";
+    std::string den = m_denominator ? m_denominator->ToString() : "";
+
+    return "(" + num + ")/(" + den + ")";
+}
+
 void FractionNode::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
     states.transform *= getTransform();

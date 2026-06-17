@@ -27,6 +27,14 @@ public:
 
     void Update(float deltaTime, sf::Vector2f mousePos) override;
     void HandleEvent(const sf::Event& event, const sf::RenderWindow& window) override;
+    std::string ToString() const override;
+
+    std::vector<MathRow*> GetInteractableRows() override {
+        std::vector<MathRow*> rows;
+        if (m_numerator) rows.push_back(m_numerator.get());
+        if (m_denominator) rows.push_back(m_denominator.get());
+        return rows;
+    }
 
 protected:
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
