@@ -10,11 +10,15 @@ import UIElement;
 import Button;
 import InputScreen;
 import MathEditor;
+import TextNode;
+import IMathNode;
 
 export class CalculatorUI : public UIElement
 {
 private:
     MathEditor m_editor;
+    std::unique_ptr<IMathNode> m_lastAnswer;
+
     sf::Sprite m_sprite;
     std::vector<std::unique_ptr<UIElement>> children;
 

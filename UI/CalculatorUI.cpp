@@ -8,6 +8,10 @@ module;
 
 module CalculatorUI;
 
+import parser.core;
+import core.context;
+import core.exceptions;
+
 import InputScreen;
 import TextNode;
 import AssetManager;
@@ -21,8 +25,8 @@ std::string intToLabel(int index)
 	switch (index)
 	{
 	case 0: return "AC";
-	case 1: return "+/-";
-	case 2: return "%";
+	case 1: return "DEL";
+	case 2: return "P";
 	case 3: return "/";
 	case 4: return "7";
 	case 5: return "8";
@@ -36,11 +40,10 @@ std::string intToLabel(int index)
 	case 13: return "2";
 	case 14: return "3";
 	case 15: return "+";
-	case 16: return "0";
-	case 17: return "?";
-	case 18: return ".";
+	case 16: return "<";
+	case 17: return "0";
+	case 18: return ">";
 	case 19: return "=";
-
 	default: return "P";
 	}
 }
@@ -110,26 +113,52 @@ CalculatorUI::CalculatorUI() : m_sprite(AssetManager::Instance().GetTexture("UI/
 
 void CalculatorUI::HandleButtonPress(const std::string& label)
 {
-	if (label == "AC")
-	{
-		m_editor.Clear();
-	}
-	else if (label == "/")
-	{
-		m_editor.InsertFraction();
-	}
-	else if (label == "P")
-	{
-		m_editor.InsertExponent();
-	}
-	else if (label == "?")
-	{
-		m_editor.StepOut();
-	}
-	else if (label == "+" || label == "-" || label == "*" || label == "=")
+	if (label == "AC") m_editor.Clear();
+	else if (label == "/") m_editor.InsertFraction();
+	else if (label == "P") m_editor.InsertExponent();
+	else if (label == "<") m_editor.MoveLeft();
+	else if (label == ">") m_editor.MoveRight();
+	else if (label == "DEL") m_editor.Delete();
+	else if (label == "+" || label == "-" || label == "*" || label == "=" || label == "%")
 	{
 		if (label == "=" && m_screenRef) {
-			//todo парсер
+			if (m_screenRef && m_editor.GetRoot())
+			{
+				try {
+					std::string expression = m_editor.GetRoot()->ToString();
+					std::cout << "got expression: " << expression << std::endl;
+
+					parser::Parser calcParser;
+					core::Context ctx;
+					auto statement = calcParser.parse(expression);
+					core::Value result = statement.evaluate(ctx);
+
+					std::string answerStr = "= " + result.toString();
+					std::cout << "got answer string: " << answerStr << std::endl;
+
+					m_lastAnswer = std::make_unique<TextNode>(answerStr, 56, sf::Color(50, 150, 50));
+					m_screenRef->SetOutput(m_lastAnswer.get());
+				}
+				catch (const core::SyntaxError& e)
+				{
+					std::cout << "Syntax Error: " << e.what() << std::endl;
+
+					m_lastAnswer = std::make_unique<TextNode>("Syntax Error", 36, sf::Color(200, 50, 50));
+					m_screenRef->SetOutput(m_lastAnswer.get());
+				}
+				catch (const core::MathError& e)
+				{
+					std::cout << "Math Error: " << e.what() << std::endl;
+					m_lastAnswer = std::make_unique<TextNode>("Math Error", 36, sf::Color(200, 50, 50));
+					m_screenRef->SetOutput(m_lastAnswer.get());
+				}
+				catch (const core::CalcError& e)
+				{
+					std::cout << "Error: " << e.what() << std::endl;
+					m_lastAnswer = std::make_unique<TextNode>("Error", 36, sf::Color(200, 50, 50));
+					m_screenRef->SetOutput(m_lastAnswer.get());
+				}
+			}
 		}
 		else {
 			m_editor.InsertOperator(" " + label + " "); 
@@ -151,6 +180,8 @@ void CalculatorUI::HandleButtonPress(const std::string& label)
 
 void CalculatorUI::Update(float deltaTime, sf::Vector2f mousePos)
 {
+	m_editor.Update(deltaTime);
+
 	sf::Vector2f localMousePos = getInverseTransform().transformPoint(mousePos);
 	for (auto& child : children)
 	{
