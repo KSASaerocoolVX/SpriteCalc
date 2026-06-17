@@ -37,6 +37,14 @@ MathMetrics MathRow::Measure() {
     return m_metrics;
 }
 
+std::string MathRow::ToString() const {
+    std::string result = "";
+    for (const auto& child : m_children) {
+        result += child->ToString();
+    }
+    return result;
+}
+
 void MathRow::Arrange() {
     float currentX = 0.f;
     for (auto& child : m_children) {
@@ -59,4 +67,53 @@ void MathRow::HandleEvent(const sf::Event& event, const sf::RenderWindow& window
 void MathRow::draw(sf::RenderTarget& target, sf::RenderStates states) const {
     states.transform *= getTransform();
     for (auto& child : m_children) target.draw(*child, states);
+
+    //курсор
+    if (m_cursorIndex >= 0 && m_showCursor) {
+        float cursorX = 0.f;
+        if (m_cursorIndex > 0 && m_cursorIndex <= m_children.size()) {
+            auto& prevChild = m_children[m_cursorIndex - 1];
+            cursorX = prevChild->getPosition().x + prevChild->m_metrics.width + (m_padding / 2.0f);
+        }
+
+        sf::RectangleShape cursorLine(sf::Vector2f(2.f, std::max(14.f, m_metrics.height)));
+        cursorLine.setFillColor(sf::Color(0, 50, 0)); 
+        cursorLine.setPosition(sf::Vector2f(cursorX, 0.f));
+        target.draw(cursorLine, states);
+    }
+}
+
+void MathRow::InsertChild(int index, std::unique_ptr<IMathNode> child) {
+    if (child) {
+        m_children.insert(m_children.begin() + index, std::move(child));
+    }
+}
+
+std::unique_ptr<IMathNode> MathRow::RemoveChild(int index) {
+    if (index >= 0 && index < m_children.size()) {
+        auto node = std::move(m_children[index]);
+        m_children.erase(m_children.begin() + index);
+        return node;
+    }
+    return nullptr;
+}
+
+IMathNode* MathRow::GetChild(int index) {
+    if (index >= 0 && index < m_children.size()) return m_children[index].get();
+    return nullptr;
+}
+
+void MathRow::SetCursor(int index, bool show) {
+    m_cursorIndex = index;
+    m_showCursor = show;
+}
+
+void MathRow::ClearCursor() {
+    m_cursorIndex = -1;
+    m_showCursor = false;
+    for (auto& child : m_children) {
+        for (auto row : child->GetInteractableRows()) {
+            row->ClearCursor();
+        }
+    }
 }

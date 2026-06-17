@@ -9,7 +9,7 @@ import AssetManager;
 
 //
 
-TextNode::TextNode(const std::string& text, unsigned int charSize, sf::Color color) : m_text(AssetManager::Instance().GetFont("UI/assets/RetroGaming.ttf"))
+TextNode::TextNode(const std::string& text, unsigned int charSize, sf::Color color, bool isOperator) : m_text(AssetManager::Instance().GetFont("UI/assets/RetroGaming.ttf")), m_isOperator(isOperator)
 {
     m_text.setString(text);
     m_text.setCharacterSize(charSize);
@@ -21,6 +21,16 @@ TextNode::TextNode(const std::string& text, unsigned int charSize, sf::Color col
 void TextNode::AppendText(const std::string& append)
 {
     m_text.setString(m_text.getString() + append);
+}
+
+bool TextNode::PopChar()
+{
+    std::string str = m_text.getString();
+    if (!str.empty() && !m_isOperator) {
+        str.pop_back();
+        m_text.setString(str);
+    }
+    return str.empty();
 }
 
 MathMetrics TextNode::Measure()
@@ -38,6 +48,13 @@ MathMetrics TextNode::Measure()
 
 void TextNode::Arrange()
 {
+}
+
+
+
+std::string TextNode::ToString() const
+{
+    return m_text.getString();
 }
 
 void TextNode::draw(sf::RenderTarget& target, sf::RenderStates states) const
