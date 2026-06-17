@@ -2,6 +2,7 @@ module;
 
 #include <optional>
 #include <cstddef>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -458,7 +459,21 @@ private:
     [[nodiscard]] Instruction makeNumberInstruction(const std::string& text) const {
         // Парсим всё как Rational
         //todo заменить
-        return { InstructionKind::Number, text, core::Value{} };
+        if (text.find('.') == std::string::npos) {
+            return {InstructionKind::Number, text, core::parseIntegerLiteral(text)};
+        }
+
+        try {
+            std::size_t parsed = 0;
+            const auto value = std::stod(text, &parsed);
+            if (parsed == text.size()) {
+                return {InstructionKind::Number, text, core::Value{value}};
+            }
+        } catch (const std::invalid_argument&) {
+        } catch (const std::out_of_range&) {
+        }
+
+        throw core::SyntaxError("invalid number literal: " + text);
     }
 
     Lexer lexer_;
