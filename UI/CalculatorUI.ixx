@@ -9,10 +9,12 @@ export module CalculatorUI;
 import UIElement;
 import Button;
 import InputScreen;
+import MathEditor;
 
 export class CalculatorUI : public UIElement
 {
 private:
+    MathEditor m_editor;
     sf::Sprite m_sprite;
     std::vector<std::unique_ptr<UIElement>> children;
 

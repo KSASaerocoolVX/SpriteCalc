@@ -22,6 +22,7 @@ add_executable(AsciCalc
  "UI/layout/ExponentNode.cpp"
  "UI/layout/MathRow.cpp"
 "UI/layout/FractionNode.cpp"
+"UI/MathEditor.cpp"
 )
 
 target_sources(AsciCalc
@@ -47,6 +48,8 @@ target_sources(AsciCalc
     "UI/layout/FractionNode.ixx"
     "UI/layout/MathRow.ixx"
     "UI/layout/ExponentNode.ixx"
+
+    "UI/MathEditor.ixx"
 )
 
 

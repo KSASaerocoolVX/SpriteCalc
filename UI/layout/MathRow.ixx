@@ -15,6 +15,7 @@ public:
     MathRow() = default;
 
     void AddChild(std::unique_ptr<IMathNode> node);
+    std::unique_ptr<IMathNode> PopLastChild();
 
     MathMetrics Measure() override;
     void Arrange() override;

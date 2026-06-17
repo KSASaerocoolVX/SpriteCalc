@@ -18,6 +18,11 @@ TextNode::TextNode(const std::string& text, unsigned int charSize, sf::Color col
     m_text.setScale(sf::Vector2f(0.25f, 0.25f));
 }
 
+void TextNode::AppendText(const std::string& append)
+{
+    m_text.setString(m_text.getString() + append);
+}
+
 MathMetrics TextNode::Measure()
 {
     sf::FloatRect bounds = m_text.getLocalBounds();

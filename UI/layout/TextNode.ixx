@@ -15,6 +15,8 @@ private:
 public:
     TextNode(const std::string& text, unsigned int charSize = 56, sf::Color color = sf::Color(75,105,47));
 
+    void AppendText(const std::string& append);
+
     MathMetrics Measure() override;
     void Arrange() override;
 

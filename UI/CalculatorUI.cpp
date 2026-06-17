@@ -13,8 +13,8 @@ import TextNode;
 import AssetManager;
 import MathRow;
 import FractionNode;
-
-
+import ExponentNode;
+import MathEditor;
 
 std::string intToLabel(int index)
 {
@@ -92,20 +92,6 @@ CalculatorUI::CalculatorUI() : m_sprite(AssetManager::Instance().GetTexture("UI/
 				};
 
 			children.push_back(std::move(button));
-
-			//float stepX = (m_buttonIdleTexture.getSize().x + paddingX) * j;
-			//float stepY = ((m_buttonIdleTexture.getSize().y + paddingY) * i);
-			//auto localPosition = sf::Vector2f(offsetX + stepX, offsetY + stepY);
-
-			//std::string label = intToLabel((i * 4) + j);
-
-			//auto btn = std::make_unique<Button>(localPosition, m_buttonIdleTexture, m_buttonHoverTexture, m_font, label);
-
-			//btn->onClick = [this, label]() {
-			//	this->HandleButtonPress(label);
-			//	};
-
-			//children.push_back(std::move(btn));
 		}
 	}
 
@@ -124,42 +110,40 @@ CalculatorUI::CalculatorUI() : m_sprite(AssetManager::Instance().GetTexture("UI/
 
 void CalculatorUI::HandleButtonPress(const std::string& label)
 {
-	if (label == "AC") {
-		m_inputBuffer.clear(); 
+	if (label == "AC")
+	{
+		m_editor.Clear();
 	}
-	else if (label == "=") {
-		//todo на потом
-		//parser.parse(m_inputBuffer).evaluate();
-		auto mainRow = std::make_unique<MathRow>();
-
-		mainRow->AddChild(std::make_unique<TextNode>("X"));
-		mainRow->AddChild(std::make_unique<TextNode>(" + "));
-
-		auto numRow = std::make_unique<MathRow>();
-		numRow->AddChild(std::make_unique<TextNode>("3")); 
-
-		auto denRow = std::make_unique<MathRow>();
-		denRow->AddChild(std::make_unique<TextNode>("4"));
-
-		auto fraction = std::make_unique<FractionNode>(std::move(numRow), std::move(denRow));
-
-		mainRow->AddChild(std::move(fraction));
-
-		m_screenRef->SetInput(std::move(mainRow));
+	else if (label == "/")
+	{
+		m_editor.InsertFraction();
 	}
-	else if (label != "P" && label != "?") {
-		m_inputBuffer += label;
+	else if (label == "P")
+	{
+		m_editor.InsertExponent();
 	}
+	else if (label == "?")
+	{
+		m_editor.StepOut();
+	}
+	else if (label == "+" || label == "-" || label == "*" || label == "=")
+	{
+		if (label == "=" && m_screenRef) {
+			//todo парсер
+		}
+		else {
+			m_editor.InsertOperator(" " + label + " "); 
+		}
+	}
+	else {
+		m_editor.InsertDigit(label);
+	}
+
+	m_editor.GetRoot()->Measure();
+	m_editor.GetRoot()->Arrange();
 
 	if (m_screenRef) {
-	/*	auto topNode = std::make_unique<TextNode>("123", m_font);
-		auto botRow = std::make_unique<TextNode>("456",m_font);
-
-		auto fraction = std::make_unique<FractionNode>(std::move(topNode), std::move(botRow));
-
-		m_screenRef->SetExpression(std::move(fraction));
-
-		m_screenRef->UpdateTransform(m_sprite.getPosition(), m_sprite.getScale());*/
+		m_screenRef->SetInput(m_editor.GetRoot());
 	}
 
 	std::cout << "buffer: \"" << m_inputBuffer << "\"\n";
@@ -171,8 +155,6 @@ void CalculatorUI::Update(float deltaTime, sf::Vector2f mousePos)
 	for (auto& child : children)
 	{
 		child->Update(deltaTime, localMousePos);
-		std::cout << localMousePos.x << " " << localMousePos.y << " Local mouse pos" << std::endl;
-		std::cout << mousePos.x << " " << mousePos.y << " Local mouse pos" << std::endl;
 	}
 }
 

@@ -22,7 +22,7 @@ void InputScreen::Update(float deltaTime, sf::Vector2f mousePos)
 	}
     if (m_outputExpression) {
         sf::Vector2f localMousePos = getInverseTransform().transformPoint(mousePos);
-        m_inputExpression->Update(deltaTime, localMousePos);
+        m_outputExpression->Update(deltaTime, localMousePos);
     }
 }
 
@@ -37,16 +37,17 @@ void InputScreen::HandleEvent(const sf::Event& event, const sf::RenderWindow& wi
 }
 
 
-void InputScreen::SetInput(std::unique_ptr<IMathNode> node) {
-    m_inputExpression = std::move(node);
+//todo ресайз с учетом нижней полосы спрайта
+void InputScreen::SetInput(IMathNode* node) {
+    m_inputExpression = node;
     if (m_inputExpression) {
         MathMetrics m = m_inputExpression->Measure();
         m_inputExpression->Arrange();
 
         sf::FloatRect bgBounds = m_sprite.getLocalBounds();
 
-        float paddingX = 8.0f;
-        float paddingY = 8.0f;
+        float paddingX = 2.0f;
+        float paddingY = 0.0f; //todo возможно стоит сделать динамическим
         float maxWidth = bgBounds.size.x - (paddingX * 2.0f);
         float maxHeight = bgBounds.size.y - (paddingY * 2.0f);
 
@@ -66,15 +67,15 @@ void InputScreen::SetInput(std::unique_ptr<IMathNode> node) {
     }
 }
 
-void InputScreen::SetOutput(std::unique_ptr<IMathNode> node) {
-    m_outputExpression = std::move(node);
+void InputScreen::SetOutput(IMathNode* node) {
+    m_outputExpression = node;
     if (m_outputExpression) {
         MathMetrics m = m_outputExpression->Measure();
         m_outputExpression->Arrange();
 
         sf::FloatRect bgBounds = m_sprite.getLocalBounds();
-        float x = bgBounds.size.x - m.width - 20.0f;
-        float y = bgBounds.size.y - m.height - 20.0f;
+        float x = bgBounds.size.x - m.width - 2.0f;
+        float y = bgBounds.size.y - m.height - 8.0f; //todo подкорректировать паддинг
 
         m_outputExpression->setPosition(sf::Vector2f(x, y));
     }

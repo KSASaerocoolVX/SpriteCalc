@@ -7,6 +7,14 @@ void MathRow::AddChild(std::unique_ptr<IMathNode> node) {
     if (node) m_children.push_back(std::move(node));
 }
 
+std::unique_ptr<IMathNode> MathRow::PopLastChild()
+{
+    if (m_children.empty()) return nullptr;
+    auto lastNode = std::move(m_children.back());
+    m_children.pop_back();
+    return lastNode;
+}
+
 MathMetrics MathRow::Measure() {
     m_metrics = { 0.f, 0.f, 0.f };
     if (m_children.empty()) return m_metrics;
