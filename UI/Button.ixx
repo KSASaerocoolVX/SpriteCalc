@@ -7,9 +7,9 @@ module;
 
 export module Button;
 
-import ITransformable;
+import UIElement;
 
-export class Button : public ITransformable
+export class Button : public UIElement
 {
 private:
     sf::Sprite m_sprite;
@@ -22,22 +22,14 @@ private:
     // opt для кнопки help и bigint
     std::optional<sf::Text> m_text;
 
-    sf::Color textColor = sf::Color(99, 155, 255);
-
-
-    sf::Vector2f m_localPosition;
-
 public:
     std::function<void()> onClick;
-    Button(sf::Vector2f position, const sf::Texture& idleTexture, const sf::Texture& hoverTexture, const sf::Font& font, const std::string& label);
 
-    Button(sf::Vector2f position, const sf::Texture& idleTexture, const sf::Texture& hoverTexture);
+    Button(sf::Vector2f position, const std::string& idleTexPath, const std::string& hoverTexPath, const std::string& label);
 
-    virtual void Draw(sf::RenderWindow& window);
-
-    virtual void UpdateTransform(sf::Vector2f parentPosition, sf::Vector2f parentScale);
-
+    void Update(float deltaTime, sf::Vector2f mousePos) override;
     void HandleEvent(const sf::Event& event, const sf::RenderWindow& window) override;
 
-    void PrintLabel();
+    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+
 };

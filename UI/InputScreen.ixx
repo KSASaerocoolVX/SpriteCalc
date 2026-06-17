@@ -7,25 +7,28 @@ module;
 
 export module InputScreen;
 
-import ITransformable;
+import UIElement;
 import IMathNode;
 
-export class InputScreen : public ITransformable
+export class InputScreen : public UIElement
 {
 private:
     sf::Sprite m_sprite;
-    sf::Vector2f m_localPosition;
-
-    std::unique_ptr<IMathNode> m_expression;
+    //std::unique_ptr<IMathNode> m_expression;
+    IMathNode* m_inputExpression = nullptr;
+    IMathNode* m_outputExpression = nullptr;  
 
 
 public:
-    InputScreen(sf::Vector2f position, const sf::Texture& texture);
+    InputScreen(sf::Vector2f position, const std::string& texturePath);
 
-    void SetExpression(std::unique_ptr<IMathNode> newExpression);
+    void SetInput(IMathNode* node);
+    void SetOutput(IMathNode* node);
 
-    virtual void Draw(sf::RenderWindow& window) override;
-    virtual void UpdateTransform(sf::Vector2f parentPosition, sf::Vector2f parentScale) override;
-    virtual void HandleEvent(const sf::Event& event, const sf::RenderWindow& window) override;
+    void Update(float deltaTime, sf::Vector2f mousePos) override;
+    void HandleEvent(const sf::Event& event, const sf::RenderWindow& window) override;
+    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 };
+
+

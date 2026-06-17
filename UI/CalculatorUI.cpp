@@ -3,25 +3,30 @@ module;
 #include <iostream>
 #include <string>
 #include <SFML/Graphics.hpp> 
-#include <string>
 #include <cmath>
 #include <memory>
 
 module CalculatorUI;
 
+import parser.core;
+import core.context;
+import core.exceptions;
+
 import InputScreen;
 import TextNode;
+import AssetManager;
+import MathRow;
 import FractionNode;
-
-
+import ExponentNode;
+import MathEditor;
 
 std::string intToLabel(int index)
 {
 	switch (index)
 	{
 	case 0: return "AC";
-	case 1: return "+/-";
-	case 2: return "%";
+	case 1: return "DEL";
+	case 2: return "P";
 	case 3: return "/";
 	case 4: return "7";
 	case 5: return "8";
@@ -35,57 +40,25 @@ std::string intToLabel(int index)
 	case 13: return "2";
 	case 14: return "3";
 	case 15: return "+";
-	case 16: return "0";
-	case 17: return "?";
-	case 18: return ".";
+	case 16: return "<";
+	case 17: return "0";
+	case 18: return ">";
 	case 19: return "=";
-
 	default: return "P";
 	}
 }
 
-CalculatorUI::CalculatorUI(sf::Vector2f position) : m_sprite(m_texture)
+CalculatorUI::CalculatorUI() : m_sprite(AssetManager::Instance().GetTexture("UI/assets/calculator_empty.png"))
 {
-	if (!m_texture.loadFromFile("UI/assets/calculator_empty.png")) {
-		std::cerr << "failed to load calculator texture" << std::endl;
-	}
-	m_sprite.setTexture(m_texture, true);
 
-	if (!m_buttonIdleTexture.loadFromFile("UI/assets/button_0.png")) {
-		std::cerr << "failed to load button texture" << std::endl;
-	}
+	sf::Vector2u textureSize = m_sprite.getTexture().getSize();
 
-	if (!m_buttonHoverTexture.loadFromFile("UI/assets/button_1.png")) {
-		std::cerr << "failed to load button texture" << std::endl;
-	}
-
-	if (!m_infoTexture.loadFromFile("UI/assets/infoButton.png")) {
-		std::cerr << "failed to load infobutton texture" << std::endl;
-	}
-
-	if (!m_bigIntTexture.loadFromFile("UI/assets/bigIntButton.png")) {
-		std::cerr << "failed to load bigIntButton texture" << std::endl;
-	}
-
-	if (!m_bigIntTexture.loadFromFile("UI/assets/bigIntButton.png")) {
-		std::cerr << "failed to load bigIntButton texture" << std::endl;
-	}
-
-	if (!m_font.openFromFile("UI/assets/RetroGaming.ttf")) {
-		std::cerr << "failed to load bigIntButton texture" << std::endl;
-	}
-
-	if (!m_inputScreenTexture.loadFromFile("UI/assets/input_screen.png")) {
-		std::cerr << "failed to load input screen texture" << std::endl;
-	}
-
-	sf::Vector2u textureSize = m_texture.getSize();
-	//m_sprite.setOrigin(sf::Vector2f(textureSize.x / 2.0f, textureSize.y / 2.0f));
-	//m_sprite.setScale(sf::Vector2f(1.0f, 1.0f));
-
-	//bigint info buttons
-	children.push_back(std::make_unique<Button>(sf::Vector2f(0, 0), m_infoTexture,m_infoTexture));
-	children.push_back(std::make_unique<Button>(sf::Vector2f(textureSize.x - m_bigIntTexture.getSize().x, 0), m_bigIntTexture,m_bigIntTexture));
+	children.push_back(std::make_unique<Button>(
+		sf::Vector2f(0.0f,0.0f),
+		"UI/assets/infoButton.png",
+		"UI/assets/infoButton.png",
+		""
+	));
 
 	//main buttons
 
@@ -98,23 +71,30 @@ CalculatorUI::CalculatorUI(sf::Vector2f position) : m_sprite(m_texture)
 	float paddingX = texWidth * 0.028f;
 	float paddingY = texHeight * 0.02f;
 
+	sf::Vector2u buttonSize = AssetManager::Instance().GetTexture("UI/assets/button_0.png").getSize();
+
 	for (int i = 0; i < 5; i++)
 	{
 		for (int j = 0; j < 4; j++)
 		{
-			float stepX = (m_buttonIdleTexture.getSize().x + paddingX) * j;
-			float stepY = ((m_buttonIdleTexture.getSize().y + paddingY) * i);
+			float stepX = (buttonSize.x + paddingX) * j;
+			float stepY = (buttonSize.y + paddingY) * i;
 			auto localPosition = sf::Vector2f(offsetX + stepX, offsetY + stepY);
 
 			std::string label = intToLabel((i * 4) + j);
 
-			auto btn = std::make_unique<Button>(localPosition, m_buttonIdleTexture, m_buttonHoverTexture, m_font, label);
+			auto button = std::make_unique<Button>(
+				localPosition,
+				"UI/assets/button_0.png",
+				"UI/assets/button_1.png",
+				label
+			);
 
-			btn->onClick = [this, label]() {
+			button->onClick = [this, label]() {
 				this->HandleButtonPress(label);
 				};
 
-			children.push_back(std::move(btn));
+			children.push_back(std::move(button));
 		}
 	}
 
@@ -123,77 +103,89 @@ CalculatorUI::CalculatorUI(sf::Vector2f position) : m_sprite(m_texture)
 	float screenOffsetX = texWidth * 0.08f;
 	auto screenPos = sf::Vector2f(screenOffsetX, screenOffsetY);
 
-	auto screen = std::make_unique<InputScreen>(screenPos, m_inputScreenTexture);
+	auto screen = std::make_unique<InputScreen>(screenPos, "UI/assets/input_screen.png");
 	m_screenRef = screen.get();
 
-	//m_screenRef->SetInputText("");
-	//m_screenRef->SetOutputText("");
+
 
 	children.push_back(std::move(screen));
 }
 
 void CalculatorUI::HandleButtonPress(const std::string& label)
 {
-	if (label == "AC") {
-		m_inputBuffer.clear(); 
+	if (label == "AC") m_editor.Clear();
+	else if (label == "/") m_editor.InsertFraction();
+	else if (label == "P") m_editor.InsertExponent();
+	else if (label == "<") m_editor.MoveLeft();
+	else if (label == ">") m_editor.MoveRight();
+	else if (label == "DEL") m_editor.Delete();
+	else if (label == "+" || label == "-" || label == "*" || label == "=" || label == "%")
+	{
+		if (label == "=" && m_screenRef) {
+			if (m_screenRef && m_editor.GetRoot())
+			{
+				try {
+					std::string expression = m_editor.GetRoot()->ToString();
+					std::cout << "got expression: " << expression << std::endl;
+
+					parser::Parser calcParser;
+					core::Context ctx;
+					auto statement = calcParser.parse(expression);
+					core::Value result = statement.evaluate(ctx);
+
+					std::string answerStr = "= " + result.toString();
+					std::cout << "got answer string: " << answerStr << std::endl;
+
+					m_lastAnswer = std::make_unique<TextNode>(answerStr, 56, sf::Color(50, 150, 50));
+					m_screenRef->SetOutput(m_lastAnswer.get());
+				}
+				catch (const core::SyntaxError& e)
+				{
+					std::cout << "Syntax Error: " << e.what() << std::endl;
+
+					m_lastAnswer = std::make_unique<TextNode>("Syntax Error", 36, sf::Color(200, 50, 50));
+					m_screenRef->SetOutput(m_lastAnswer.get());
+				}
+				catch (const core::MathError& e)
+				{
+					std::cout << "Math Error: " << e.what() << std::endl;
+					m_lastAnswer = std::make_unique<TextNode>("Math Error", 36, sf::Color(200, 50, 50));
+					m_screenRef->SetOutput(m_lastAnswer.get());
+				}
+				catch (const core::CalcError& e)
+				{
+					std::cout << "Error: " << e.what() << std::endl;
+					m_lastAnswer = std::make_unique<TextNode>("Error", 36, sf::Color(200, 50, 50));
+					m_screenRef->SetOutput(m_lastAnswer.get());
+				}
+			}
+		}
+		else {
+			m_editor.InsertOperator(" " + label + " "); 
+		}
 	}
-	else if (label == "=") {
-		//todo на потом
-		//parser.parse(m_inputBuffer).evaluate();
+	else {
+		m_editor.InsertDigit(label);
 	}
-	else if (label != "P" && label != "?") {
-		m_inputBuffer += label;
-	}
+
+	m_editor.GetRoot()->Measure();
+	m_editor.GetRoot()->Arrange();
 
 	if (m_screenRef) {
-		auto topNode = std::make_unique<TextNode>("123", m_font);
-		auto botRow = std::make_unique<TextNode>("456",m_font);
-
-		auto fraction = std::make_unique<FractionNode>(std::move(topNode), std::move(botRow));
-
-		m_screenRef->SetExpression(std::move(fraction));
-
-		m_screenRef->UpdateTransform(m_sprite.getPosition(), m_sprite.getScale());
+		m_screenRef->SetInput(m_editor.GetRoot());
 	}
 
 	std::cout << "buffer: \"" << m_inputBuffer << "\"\n";
 }
 
-void CalculatorUI::UpdateTransform(sf::Vector2f position, sf::Vector2f scale)
+void CalculatorUI::Update(float deltaTime, sf::Vector2f mousePos)
 {
-	SetPosition(position);
-	SetScale(scale);
-}
+	m_editor.Update(deltaTime);
 
-void CalculatorUI::SetPosition(sf::Vector2f targetPosition)
-{
-	m_sprite.setPosition(targetPosition);
-
+	sf::Vector2f localMousePos = getInverseTransform().transformPoint(mousePos);
 	for (auto& child : children)
 	{
-		child->UpdateTransform(m_sprite.getPosition(),m_sprite.getScale());
-	}
-}
-
-void CalculatorUI::SetScale(sf::Vector2f targetScale)
-{
-	m_sprite.setScale(targetScale);
-
-	for (auto& child : children)
-	{
-		child->UpdateTransform(m_sprite.getPosition(),m_sprite.getScale());
-	}
-}
-
-
-
-void CalculatorUI::Draw(sf::RenderWindow& window)
-{
-	window.draw(m_sprite);
-
-	for (auto& button : children)
-	{
-		button->Draw(window);
+		child->Update(deltaTime, localMousePos);
 	}
 }
 
@@ -202,5 +194,15 @@ void CalculatorUI::HandleEvent(const sf::Event& event, const sf::RenderWindow& w
 	for (auto& child : children)
 	{
 		child->HandleEvent(event, window);
+	}
+}
+
+void CalculatorUI::draw(sf::RenderTarget& target, sf::RenderStates states) const
+{
+	states.transform *= getTransform();
+	target.draw(m_sprite, states);
+	for (const auto& child : children)
+	{
+		target.draw(*child, states);
 	}
 }

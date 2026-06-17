@@ -5,50 +5,85 @@ module;
 
 module InputScreen;
 
+import AssetManager;
 import TextNode;
 
-InputScreen::InputScreen(sf::Vector2f localPosition, const sf::Texture& texture): m_sprite(texture)
+InputScreen::InputScreen(sf::Vector2f position, const std::string& texturePath) : m_sprite(AssetManager::Instance().GetTexture(texturePath))
 {
-	m_localPosition = localPosition;
-	m_sprite.setPosition(localPosition);
+	setPosition(position);
 }
 
-void InputScreen::SetExpression(std::unique_ptr<IMathNode> newExpression)
+
+void InputScreen::Update(float deltaTime, sf::Vector2f mousePos)
 {
-	m_expression = std::move(newExpression);
-
-	if (m_expression) {
-		m_expression->Measure();
+	if (m_inputExpression) {
+		sf::Vector2f localMousePos = getInverseTransform().transformPoint(mousePos);
+		m_inputExpression->Update(deltaTime, localMousePos);
 	}
-}
-
-void InputScreen::Draw(sf::RenderWindow& window)
-{
-	window.draw(m_sprite);
-	if (m_expression) m_expression->Draw(window);
-	else
-	{
-		std::cout << "No expression to draw" << std::endl;
-	}
-}
-
-void InputScreen::UpdateTransform(sf::Vector2f parentPosition, sf::Vector2f parentScale)
-{
-	float xPos = parentPosition.x + (m_localPosition.x * parentScale.x);
-	float yPos = parentPosition.y + (m_localPosition.y * parentScale.y);
-
-	m_sprite.setPosition(sf::Vector2f(xPos, yPos));
-	m_sprite.setScale(sf::Vector2f(parentScale.x, parentScale.y));
-
-	if (m_expression)
-	{
-		//паддинг
-		m_expression->Arrange(sf::Vector2f(2.0f,2.0f));
-		m_expression->UpdateTransform(m_sprite.getPosition(), parentScale);
-	}
+    if (m_outputExpression) {
+        sf::Vector2f localMousePos = getInverseTransform().transformPoint(mousePos);
+        m_outputExpression->Update(deltaTime, localMousePos);
+    }
 }
 
 void InputScreen::HandleEvent(const sf::Event& event, const sf::RenderWindow& window)
 {
-	if (m_expression) m_expression->HandleEvent(event, window);
+	if (m_inputExpression) {
+		m_inputExpression->HandleEvent(event, window);
+	}
+    if (m_outputExpression) {
+        m_outputExpression->HandleEvent(event, window);
+    }
+}
+
+
+//todo ресайз с учетом нижней полосы спрайта
+void InputScreen::SetInput(IMathNode* node) {
+    m_inputExpression = node;
+    if (m_inputExpression) {
+        MathMetrics m = m_inputExpression->Measure();
+        m_inputExpression->Arrange();
+
+        sf::FloatRect bgBounds = m_sprite.getLocalBounds();
+
+        float paddingX = 2.0f;
+        float paddingY = 0.0f; //todo возможно стоит сделать динамическим
+        float maxWidth = bgBounds.size.x - (paddingX * 2.0f);
+        float maxHeight = bgBounds.size.y - (paddingY * 2.0f);
+
+        float scale = 1.0f;
+        if (m.width > 0 && m.height > 0) {
+            float scaleX = maxWidth / m.width;
+            float scaleY = maxHeight / m.height;
+            scale = std::min({ 1.0f, scaleX, scaleY });
+        }
+
+        m_inputExpression->setScale(sf::Vector2f(scale, scale));
+
+        float screenCenterY = bgBounds.size.y / 2.0f;
+        float yPos = screenCenterY - (m.baselineY * scale);
+
+        m_inputExpression->setPosition(sf::Vector2f(paddingX, yPos));
+    }
+}
+
+void InputScreen::SetOutput(IMathNode* node) {
+    m_outputExpression = node;
+    if (m_outputExpression) {
+        MathMetrics m = m_outputExpression->Measure();
+        m_outputExpression->Arrange();
+
+        sf::FloatRect bgBounds = m_sprite.getLocalBounds();
+        float x = bgBounds.size.x - m.width - 2.0f;
+        float y = bgBounds.size.y - m.height - 8.0f; //todo подкорректировать паддинг
+
+        m_outputExpression->setPosition(sf::Vector2f(x, y));
+    }
+}
+
+void InputScreen::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+    states.transform *= getTransform();
+    target.draw(m_sprite, states);
+    if (m_inputExpression) target.draw(*m_inputExpression, states);
+    if (m_outputExpression) target.draw(*m_outputExpression, states);
 }

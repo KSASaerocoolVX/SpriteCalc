@@ -456,9 +456,7 @@ private:
     }
 
     [[nodiscard]] Instruction makeNumberInstruction(const std::string& text) const {
-        // Парсим всё как Rational
-        //todo заменить
-        return { InstructionKind::Number, text, core::Value{} };
+        return { InstructionKind::Number, text, core::Value(math::Rational(std::stoll(text))) };
     }
 
     Lexer lexer_;

@@ -19,7 +19,11 @@ add_executable(AsciCalc
     "UI/CalculatorUI.cpp"
     "UI/InputScreen.cpp"
     "UI/layout/TextNode.cpp"
- "UI/layout/FractionNode.cpp")
+ "UI/layout/ExponentNode.cpp"
+ "UI/layout/MathRow.cpp"
+"UI/layout/FractionNode.cpp"
+"UI/MathEditor.cpp"
+)
 
 target_sources(AsciCalc
     PRIVATE
@@ -32,16 +36,20 @@ target_sources(AsciCalc
     "src/parser/core.ixx"
     "src/parser/lexer.ixx"
     
-    "UI/ITransformable.ixx"
+    "UI/AssetManager.ixx"
     "UI/Background.ixx"
     "UI/Button.ixx"
     "UI/InputScreen.ixx"
     "UI/CalculatorUI.ixx"
-    "UI/CalculatorUITab.ixx"
+    "UI/UIElement.ixx"
     
     "UI/layout/IMathNode.ixx"
     "UI/layout/TextNode.ixx"
     "UI/layout/FractionNode.ixx"
+    "UI/layout/MathRow.ixx"
+    "UI/layout/ExponentNode.ixx"
+
+    "UI/MathEditor.ixx"
 )
 
 
