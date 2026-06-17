@@ -11,72 +11,213 @@ MathEditor::MathEditor()
     Clear();
 }
 
-MathRow* MathEditor::GetCurrentRow() {
-    return m_rowStack.back();
-}
 
 MathRow* MathEditor::GetRoot() {
     return m_root.get();
 }
 
+
 void MathEditor::Clear() {
     m_root = std::make_unique<MathRow>();
-    m_rowStack.clear();
-    m_rowStack.push_back(m_root.get());
-    m_activeTextNode = nullptr;
+    m_path.clear();
+    m_currentRow = m_root.get();
+    m_currentIndex = 0;
+    RefreshCursor();
+}
+
+void MathEditor::Update(float deltaTime) {
+    m_cursorTimer += deltaTime;
+    if (m_cursorTimer > 0.5f) {
+        m_cursorTimer = 0.0f;
+        m_cursorVisible = !m_cursorVisible;
+        RefreshCursor();
+    }
+}
+
+void MathEditor::RefreshCursor() {
+    m_root->ClearCursor();
+    m_currentRow->SetCursor(m_currentIndex, m_cursorVisible);
+}
+
+void MathEditor::MoveLeft() {
+    m_cursorVisible = true;
+    m_cursorTimer = 0.0f;
+
+    if (m_currentIndex > 0) {
+        IMathNode* leftNode = m_currentRow->GetChild(m_currentIndex - 1);
+        auto rows = leftNode->GetInteractableRows();
+        if (!rows.empty()) {
+
+            m_path.push_back({ m_currentRow, m_currentIndex - 1 });
+
+            m_currentRow = rows.back();
+            m_currentIndex = m_currentRow->GetChildCount();
+        }
+        else {
+            m_currentIndex--;
+        }
+    }
+    else {
+        if (!m_path.empty()) {
+            CursorState parent = m_path.back();
+            IMathNode* parentNode = parent.row->GetChild(parent.index);
+            auto siblingRows = parentNode->GetInteractableRows();
+
+            int mySubRowIndex = -1;
+            for (int i = 0; i < siblingRows.size(); i++) {
+                if (siblingRows[i] == m_currentRow) {
+                    mySubRowIndex = i;
+                    break;
+                }
+            }
+
+            if (mySubRowIndex > 0) {
+                m_currentRow = siblingRows[mySubRowIndex - 1];
+                m_currentIndex = m_currentRow->GetChildCount();
+            }
+            else {
+                m_path.pop_back();
+                m_currentRow = parent.row;
+                m_currentIndex = parent.index; 
+            }
+        }
+    }
+    RefreshCursor();
+}
+
+void MathEditor::MoveRight() {
+    m_cursorVisible = true;
+    m_cursorTimer = 0.f;
+
+    if (m_currentIndex < m_currentRow->GetChildCount()) {
+        IMathNode* rightNode = m_currentRow->GetChild(m_currentIndex);
+        auto rows = rightNode->GetInteractableRows();
+        if (!rows.empty()) {
+            m_path.push_back({ m_currentRow, m_currentIndex });
+            m_currentRow = rows.front();
+            m_currentIndex = 0;
+        }
+        else {
+            m_currentIndex++;
+        }
+    }
+    else {
+        if (!m_path.empty()) {
+            CursorState parent = m_path.back();
+            IMathNode* parentNode = parent.row->GetChild(parent.index);
+            auto siblingRows = parentNode->GetInteractableRows();
+
+            int mySubRowIndex = -1;
+            for (int i = 0; i < siblingRows.size(); i++) {
+                if (siblingRows[i] == m_currentRow) {
+                    mySubRowIndex = i;
+                    break;
+                }
+            }
+
+            if (mySubRowIndex != -1 && mySubRowIndex < siblingRows.size() - 1) {
+                m_currentRow = siblingRows[mySubRowIndex + 1];
+                m_currentIndex = 0;
+            }
+            else {
+                m_path.pop_back();
+                m_currentRow = parent.row;
+                m_currentIndex = parent.index + 1; 
+            }
+        }
+    }
+    RefreshCursor();
+}
+
+void MathEditor::Delete() {
+    if (m_currentIndex > 0) {
+        IMathNode* leftNode = m_currentRow->GetChild(m_currentIndex - 1);
+
+        if (leftNode->IsText() && !leftNode->IsOperator()) {
+            TextNode* text = static_cast<TextNode*>(leftNode);
+            if (text->PopChar()) {
+                m_currentRow->RemoveChild(m_currentIndex - 1);
+                m_currentIndex--;
+            }
+        }
+        else {
+            m_currentRow->RemoveChild(m_currentIndex - 1);
+            m_currentIndex--;
+        }
+    }
+    else if (!m_path.empty()) {
+        MoveLeft();
+    }
+    RefreshCursor();
 }
 
 void MathEditor::InsertDigit(const std::string& digit) {
-    if (m_activeTextNode) {
-        m_activeTextNode->AppendText(digit);
+    if (m_currentIndex > 0) {
+        IMathNode* prev = m_currentRow->GetChild(m_currentIndex - 1);
+        if (prev->IsText() && !prev->IsOperator()) {
+            static_cast<TextNode*>(prev)->AppendText(digit);
+            RefreshCursor();
+            return;
+        }
     }
-    else {
-        auto newNode = std::make_unique<TextNode>(digit, 56, sf::Color(75, 105, 47));
-        m_activeTextNode = newNode.get();
-        GetCurrentRow()->AddChild(std::move(newNode));
-    }
+    auto newNode = std::make_unique<TextNode>(digit, 56, sf::Color(75, 105, 47));
+    m_currentRow->InsertChild(m_currentIndex, std::move(newNode));
+    m_currentIndex++;
+    RefreshCursor();
 }
 
-void MathEditor::InsertOperator(const std::string& op)
-{
-    m_activeTextNode = nullptr;
-    auto newNode = std::make_unique<TextNode>(op, 56, sf::Color(75, 105, 47));
-    GetCurrentRow()->AddChild(std::move(newNode));
+void MathEditor::InsertOperator(const std::string& op) {
+    auto newNode = std::make_unique<TextNode>(op, 56, sf::Color(75, 105, 47), true);
+    m_currentRow->InsertChild(m_currentIndex, std::move(newNode));
+    m_currentIndex++;
+    RefreshCursor();
 }
 
 void MathEditor::InsertFraction() {
-    m_activeTextNode = nullptr; 
-    auto current = GetCurrentRow();
+    std::unique_ptr<IMathNode> numContent;
 
-    //последний символ в дробь
-    auto lastNode = current->PopLastChild();
+    if (m_currentIndex > 0) {
+        IMathNode* prev = m_currentRow->GetChild(m_currentIndex - 1);
+        if (prev && !prev->IsOperator()) {
+            numContent = m_currentRow->RemoveChild(m_currentIndex - 1);
+            m_currentIndex--;
+        }
+    }
 
     auto numRow = std::make_unique<MathRow>();
-    if (lastNode) {
-        numRow->AddChild(std::move(lastNode));
+    if (numContent) {
+        numRow->AddChild(std::move(numContent));
     }
     else {
         numRow->AddChild(std::make_unique<TextNode>(" ", 56, sf::Color(75, 105, 47)));
     }
 
     auto denRow = std::make_unique<MathRow>();
-    MathRow* ptrToDenominator = denRow.get(); 
+    MathRow* ptrToDenominator = denRow.get();
 
     auto fraction = std::make_unique<FractionNode>(std::move(numRow), std::move(denRow));
-    current->AddChild(std::move(fraction));
+    m_currentRow->InsertChild(m_currentIndex, std::move(fraction));
 
-    m_rowStack.push_back(ptrToDenominator);
+    m_path.push_back({ m_currentRow, m_currentIndex });
+    m_currentRow = ptrToDenominator;
+    m_currentIndex = 0;
+    RefreshCursor();
 }
 
 void MathEditor::InsertExponent() {
-    m_activeTextNode = nullptr;
-    auto current = GetCurrentRow();
+    std::unique_ptr<IMathNode> baseContent;
 
-    auto lastNode = current->PopLastChild();
+    if (m_currentIndex > 0) {
+        IMathNode* prev = m_currentRow->GetChild(m_currentIndex - 1);
+        if (prev && !prev->IsOperator()) {
+            baseContent = m_currentRow->RemoveChild(m_currentIndex - 1);
+            m_currentIndex--;
+        }
+    }
 
     auto baseRow = std::make_unique<MathRow>();
-    if (lastNode) {
-        baseRow->AddChild(std::move(lastNode));
+    if (baseContent) {
+        baseRow->AddChild(std::move(baseContent));
     }
     else {
         baseRow->AddChild(std::make_unique<TextNode>(" ", 56, sf::Color(75, 105, 47)));
@@ -86,15 +227,11 @@ void MathEditor::InsertExponent() {
     MathRow* ptrToPower = powRow.get();
 
     auto exponent = std::make_unique<ExponentNode>(std::move(baseRow), std::move(powRow));
-    current->AddChild(std::move(exponent));
+    m_currentRow->InsertChild(m_currentIndex, std::move(exponent));
 
-    m_rowStack.push_back(ptrToPower);
+    m_path.push_back({ m_currentRow, m_currentIndex });
+    m_currentRow = ptrToPower;
+    m_currentIndex = 0;
+    RefreshCursor();
 }
 
-void MathEditor::StepOut() {
-    m_activeTextNode = nullptr;
-
-    if (m_rowStack.size() > 1) {
-        m_rowStack.pop_back();
-    }
-}
