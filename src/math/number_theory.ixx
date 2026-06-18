@@ -92,7 +92,6 @@ struct ExtendedGcdResult {
     return value;
 }
 
-<<<<<<< HEAD
 [[nodiscard]] long long modMul(long long a, long long b, long long mod) {
     if (mod <= 0) {
         throw core::MathError("modulus must be positive");
@@ -113,8 +112,6 @@ struct ExtendedGcdResult {
     return result;
 }
 
-=======
->>>>>>> main
 [[nodiscard]] long long modPow(long long base, long long exponent, long long mod) {
     if (mod <= 0) {
         throw core::MathError("modulus must be positive");
@@ -129,17 +126,10 @@ struct ExtendedGcdResult {
 
     while (exponent > 0) {
         if (exponent % 2 == 1) {
-<<<<<<< HEAD
             result = modMul(result, base, mod);
         }
 
         base = modMul(base, base, mod);
-=======
-            result = static_cast<long long>((__int128)result * base % mod);
-        }
-
-        base = static_cast<long long>((__int128)base * base % mod);
->>>>>>> main
         exponent /= 2;
     }
 
@@ -182,7 +172,6 @@ struct ExtendedGcdResult {
     return true;
 }
 
-<<<<<<< HEAD
 [[nodiscard]] long long phi(long long n) {
     if (n < 1) {
         return 0;
@@ -202,6 +191,4 @@ struct ExtendedGcdResult {
     return result;
 }
 
-=======
->>>>>>> main
 }

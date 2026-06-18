@@ -51,7 +51,6 @@ public:
         }
 
         if (real_.isZero()) {
-<<<<<<< HEAD
             if (imaginary_ == Rational(1)) return "i";
             if (imaginary_ == Rational(-1)) return "-i";
             return imaginary_.toString() + "i";
@@ -64,11 +63,6 @@ public:
             return real_.toString() + " - i";
         }
 
-=======
-            return imaginary_.toString() + "i";
-        }
-
->>>>>>> main
         if (imaginary_ < Rational{0}) {
             return real_.toString() + " - " + (-imaginary_).toString() + "i";
         }

@@ -17,9 +17,9 @@ public:
     void Arrange() override;
     std::string ToString() const override;
 
-    //todo переместить
-    std::vector<MathRow*> GetInteractableRows() override {
-        std::vector<MathRow*> rows;
+    //todo РїРµСЂРµРјРµСЃС‚РёС‚СЊ
+    std::vector<IMathNode*> GetInteractableRows() override {
+        std::vector<IMathNode*> rows;
         if (m_base) rows.push_back(m_base.get());
         if (m_power) rows.push_back(m_power.get());
         return rows;

@@ -400,7 +400,6 @@ public:
                             throw core::MathError("tan expects a real number argument");
                         }
                     }
-                    }
                     else if (instruction.text == "log") {
                         if (instruction.argumentCount != 1) throw core::SyntaxError("log expects 1 argument");
                         ensureStackSize(stack, 1);
@@ -538,19 +537,19 @@ public:
     }
 
 private:
-    static void ensureStackSize(const std::vector<core::Value>& stack, std::size_t expected) {
+    void ensureStackSize(const std::vector<core::Value>& stack, std::size_t expected) const {
         if (stack.size() < expected) {
             throw core::SyntaxError("missing operand");
         }
     }
 
-    static core::Value popValue(std::vector<core::Value>& stack) {
+    core::Value popValue(std::vector<core::Value>& stack) const {
         auto value = stack.back();
         stack.pop_back();
         return value;
     }
 
-    static void evaluateBinary(InstructionKind kind, std::vector<core::Value>& stack) {
+    void evaluateBinary(InstructionKind kind, std::vector<core::Value>& stack) const {
         ensureStackSize(stack, 2);
 
         const auto right = popValue(stack);
@@ -914,11 +913,7 @@ private:
     }
 
     [[nodiscard]] Instruction makeNumberInstruction(const std::string& text) const {
-<<<<<<< HEAD
         return { InstructionKind::Number, text, core::Value(parseDecimalOrInt(text)) };
-=======
-        return { InstructionKind::Number, text, core::Value(math::Rational(std::stoll(text))) };
->>>>>>> main
     }
 
     Lexer lexer_;

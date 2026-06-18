@@ -25,7 +25,11 @@ private:
     std::string m_inputBuffer;
     InputScreen* m_screenRef = nullptr; 
 
+    std::unique_ptr<sf::RenderWindow> m_helpWindow;
+    std::string m_helpTextStr;
+
     void HandleButtonPress(const std::string& label);
+    void ShowHelpWindow();
 
 public:
     //CalculatorUI(sf::Vector2f position);

@@ -68,7 +68,7 @@ void MathRow::draw(sf::RenderTarget& target, sf::RenderStates states) const {
     states.transform *= getTransform();
     for (auto& child : m_children) target.draw(*child, states);
 
-    //êóðñîð
+    //ÐºÑƒÑ€ÑÐ¾Ñ€
     if (m_cursorIndex >= 0 && m_showCursor) {
         float cursorX = 0.f;
         if (m_cursorIndex > 0 && m_cursorIndex <= m_children.size()) {
@@ -113,7 +113,7 @@ void MathRow::ClearCursor() {
     m_showCursor = false;
     for (auto& child : m_children) {
         for (auto row : child->GetInteractableRows()) {
-            row->ClearCursor();
+            static_cast<MathRow*>(row)->ClearCursor();
         }
     }
 }

@@ -37,11 +37,8 @@ MathMetrics TextNode::Measure()
 {
     sf::FloatRect bounds = m_text.getLocalBounds();
     m_metrics.width = (bounds.position.x + bounds.size.x) * 0.25f;
-
-    float fixedHeight = m_text.getCharacterSize() * 0.25f;
-    m_metrics.height = fixedHeight;
-
-    m_metrics.baselineY = fixedHeight * 0.5f;
+    m_metrics.height = (bounds.position.y + bounds.size.y) * 0.25f;
+    m_metrics.baselineY = m_metrics.height * 0.5f;
 
     return m_metrics;
 }

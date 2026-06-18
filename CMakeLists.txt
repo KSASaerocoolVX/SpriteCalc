@@ -1,21 +1,10 @@
 cmake_minimum_required(VERSION 3.28)
+project(AsciCalc CXX)
 
-project(SpriteCalc LANGUAGES CXX)
-
-set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
-
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(FetchContent)
-
-set(SFML_BUILD_AUDIO OFF CACHE BOOL "" FORCE)
-set(SFML_BUILD_NETWORK OFF CACHE BOOL "" FORCE)
-set(SFML_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(SFML_BUILD_DOC OFF CACHE BOOL "" FORCE)
-set(SFML_BUILD_TEST_SUITE OFF CACHE BOOL "" FORCE)
-
 FetchContent_Declare(
     SFML
     GIT_REPOSITORY https://github.com/SFML/SFML.git
@@ -23,11 +12,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SFML)
 
-<<<<<<< HEAD
-add_library(SpriteCalcCore
-    src/calc/ExpressionEvaluator.cpp
-    src/app/SelfTest.cpp
-=======
 add_executable(AsciCalc
     "UI/main.cpp"
     "UI/Background.cpp"
@@ -39,32 +23,28 @@ add_executable(AsciCalc
  "UI/layout/MathRow.cpp"
 "UI/layout/FractionNode.cpp"
 "UI/MathEditor.cpp"
->>>>>>> main
 )
 
-target_include_directories(SpriteCalcCore
-    PUBLIC
-        "${CMAKE_CURRENT_SOURCE_DIR}/src"
-)
-
-add_executable(SpriteCalc
-    src/main.cpp
-    src/app/Repl.cpp
-)
-
-target_link_libraries(SpriteCalc
-    PRIVATE
-<<<<<<< HEAD
-        SpriteCalcCore
-=======
-    FILE_SET CXX_MODULES FILES
-    
+set(CORE_MODULE_FILES
     "src/core/context.ixx"
     "src/core/exceptions.ixx"
     "src/core/value.ixx"
     "src/math/rational.ixx"
+    "src/math/matrix.ixx"
+    "src/math/poly.ixx"
+    "src/math/modular.ixx"
+    "src/math/complex.ixx"
+    "src/math/number_theory.ixx"
+    "src/math/functions.ixx"
     "src/parser/core.ixx"
     "src/parser/lexer.ixx"
+    "src/app/help.ixx"
+)
+
+target_sources(AsciCalc
+    PRIVATE
+    FILE_SET CXX_MODULES FILES
+    ${CORE_MODULE_FILES}
     
     "UI/AssetManager.ixx"
     "UI/Background.ixx"
@@ -80,46 +60,43 @@ target_link_libraries(SpriteCalc
     "UI/layout/ExponentNode.ixx"
 
     "UI/MathEditor.ixx"
->>>>>>> main
 )
 
-add_executable(SpriteCalcGui
-    UI/main.cpp
-    UI/Background.cpp
-    UI/Button.cpp
-    UI/CalculatorUI.cpp
-    UI/InputScreen.cpp
-    UI/layout/TextNode.cpp
-    UI/layout/FractionNode.cpp
+
+
+
+add_custom_command(TARGET AsciCalc POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_CURRENT_SOURCE_DIR}/UI/assets"
+    "$<TARGET_FILE_DIR:AsciCalc>/UI/assets"
 )
 
-target_link_libraries(SpriteCalcGui
+add_custom_command(TARGET AsciCalc POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_CURRENT_SOURCE_DIR}/UI/shaders"
+    "$<TARGET_FILE_DIR:AsciCalc>/UI/shaders"
+)
+
+target_link_libraries(AsciCalc PRIVATE SFML::Graphics SFML::Window SFML::System)
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT AsciCalc)
+
+add_executable(AsciCalcConsole
+    "src/main.cpp"
+    "src/app/Repl.cpp"
+    "src/app/Repl.hpp"
+    "src/app/SelfTest.cpp"
+    "src/app/SelfTest.hpp"
+    "src/calc/ExpressionEvaluator.cpp"
+    "src/calc/ExpressionEvaluator.hpp"
+)
+set_target_properties(AsciCalcConsole PROPERTIES
+    CXX_STANDARD 20
+    CXX_STANDARD_REQUIRED ON
+)
+target_include_directories(AsciCalcConsole PRIVATE src)
+
+target_sources(AsciCalcConsole
     PRIVATE
-        SpriteCalcCore
-        SFML::Graphics
-        SFML::Window
-        SFML::System
+    FILE_SET CXX_MODULES FILES
+    ${CORE_MODULE_FILES}
 )
-
-add_executable(SpriteCalcTests
-    tests/expression_evaluator_tests.cpp
-)
-
-target_link_libraries(SpriteCalcTests
-    PRIVATE
-        SpriteCalcCore
-)
-
-enable_testing()
-add_test(NAME ExpressionEvaluatorTests COMMAND SpriteCalcTests)
-
-foreach(asset_dir IN ITEMS assets shaders)
-    add_custom_command(TARGET SpriteCalcGui POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${CMAKE_CURRENT_SOURCE_DIR}/UI/${asset_dir}"
-            "$<TARGET_FILE_DIR:SpriteCalcGui>/UI/${asset_dir}"
-        VERBATIM
-    )
-endforeach()
-
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT SpriteCalc)
