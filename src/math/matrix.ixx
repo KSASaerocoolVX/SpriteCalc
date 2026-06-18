@@ -177,6 +177,7 @@ public:
         return !(left == right);
     }
 
+<<<<<<< HEAD
     [[nodiscard]] Rational determinant() const {
         if (!isSquare()) {
             throw core::MathError("matrix must be square to calculate determinant");
@@ -232,6 +233,8 @@ public:
         return sign ? detVal : -detVal;
     }
 
+=======
+>>>>>>> main
 private:
     std::size_t rows_ = 0;
     std::size_t cols_ = 0;

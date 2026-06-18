@@ -914,7 +914,11 @@ private:
     }
 
     [[nodiscard]] Instruction makeNumberInstruction(const std::string& text) const {
+<<<<<<< HEAD
         return { InstructionKind::Number, text, core::Value(parseDecimalOrInt(text)) };
+=======
+        return { InstructionKind::Number, text, core::Value(math::Rational(std::stoll(text))) };
+>>>>>>> main
     }
 
     Lexer lexer_;

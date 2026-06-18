@@ -5,17 +5,21 @@ module;
 
 export module core.value;
 import math.rational;
+<<<<<<< HEAD
 import math.complex;
 import math.matrix;
 import math.poly;
 import core.exceptions;
+=======
+>>>>>>> main
 
 export namespace core {
 
-class Value {
+export class Value {
 public:
     Value() : data_(math::Rational(0)) {}
     Value(math::Rational r) : data_(r) {}
+<<<<<<< HEAD
     Value(math::Complex c) : data_(c) {}
     Value(math::Matrix m) : data_(m) {}
     Value(math::Polynomial p) : data_(p) {}
@@ -35,11 +39,14 @@ public:
     [[nodiscard]] bool isPolynomial() const noexcept {
         return std::holds_alternative<math::Polynomial>(data_);
     }
+=======
+>>>>>>> main
 
     [[nodiscard]] math::Rational asRational() const {
         return std::get<math::Rational>(data_);
     }
 
+<<<<<<< HEAD
     [[nodiscard]] math::Complex asComplex() const {
         return std::get<math::Complex>(data_);
     }
@@ -278,3 +285,29 @@ private:
 }
 
 }
+=======
+    [[nodiscard]] std::string toString() const {
+        return asRational().toString(); 
+    }
+
+private:
+    std::variant<math::Rational> data_; 
+};
+
+[[nodiscard]] Value add(const Value& left, const Value& right) {
+    return Value(left.asRational() + right.asRational());
+}
+[[nodiscard]] Value subtract(const Value& left, const Value& right) {
+    return Value(left.asRational() - right.asRational());
+}
+[[nodiscard]] Value multiply(const Value& left, const Value& right) {
+    return Value(left.asRational() * right.asRational());
+}
+[[nodiscard]] Value divide(const Value& left, const Value& right) {
+    return Value(left.asRational() / right.asRational());
+}
+[[nodiscard]] Value negate(const Value& val) {
+    return Value(-val.asRational());
+}
+}
+>>>>>>> main

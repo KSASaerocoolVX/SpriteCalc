@@ -23,9 +23,23 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SFML)
 
+<<<<<<< HEAD
 add_library(SpriteCalcCore
     src/calc/ExpressionEvaluator.cpp
     src/app/SelfTest.cpp
+=======
+add_executable(AsciCalc
+    "UI/main.cpp"
+    "UI/Background.cpp"
+    "UI/Button.cpp"
+    "UI/CalculatorUI.cpp"
+    "UI/InputScreen.cpp"
+    "UI/layout/TextNode.cpp"
+ "UI/layout/ExponentNode.cpp"
+ "UI/layout/MathRow.cpp"
+"UI/layout/FractionNode.cpp"
+"UI/MathEditor.cpp"
+>>>>>>> main
 )
 
 target_include_directories(SpriteCalcCore
@@ -40,7 +54,33 @@ add_executable(SpriteCalc
 
 target_link_libraries(SpriteCalc
     PRIVATE
+<<<<<<< HEAD
         SpriteCalcCore
+=======
+    FILE_SET CXX_MODULES FILES
+    
+    "src/core/context.ixx"
+    "src/core/exceptions.ixx"
+    "src/core/value.ixx"
+    "src/math/rational.ixx"
+    "src/parser/core.ixx"
+    "src/parser/lexer.ixx"
+    
+    "UI/AssetManager.ixx"
+    "UI/Background.ixx"
+    "UI/Button.ixx"
+    "UI/InputScreen.ixx"
+    "UI/CalculatorUI.ixx"
+    "UI/UIElement.ixx"
+    
+    "UI/layout/IMathNode.ixx"
+    "UI/layout/TextNode.ixx"
+    "UI/layout/FractionNode.ixx"
+    "UI/layout/MathRow.ixx"
+    "UI/layout/ExponentNode.ixx"
+
+    "UI/MathEditor.ixx"
+>>>>>>> main
 )
 
 add_executable(SpriteCalcGui
