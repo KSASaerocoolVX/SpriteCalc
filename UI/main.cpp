@@ -44,8 +44,8 @@ int main()
 
 	CalculatorUI calculator;
 
-	calculator.setPosition(windowCenter);
-	calculator.setScale(sf::Vector2f(3.0f, 3.0f));
+	//calculator.setPosition(windowCenter);
+	//calculator.setScale(sf::Vector2f(3.0f, 3.0f));
 	//calculator.setRotation(sf::degrees(45.0f));
 
 	sf::Clock clock;

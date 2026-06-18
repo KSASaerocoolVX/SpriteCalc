@@ -21,6 +21,7 @@ import FractionNode;
 import ExponentNode;
 import MathEditor;
 import app.help;
+import CalculatorUI;
 
 
 static std::string wrapText(const std::string& text, std::size_t maxCharsLine) {
@@ -148,6 +149,19 @@ CalculatorUI::CalculatorUI() : m_sprite(AssetManager::Instance().GetTexture("UI/
 			children.push_back(std::move(button));
 		}
 	}
+
+	//вкладки
+	float tabStartX = texWidth * 0.88f;
+	float tabStartY = texHeight * 0.15f;
+
+	auto trigTab = std::make_unique<CalculatorUITab>(
+		sf::Vector2f(tabStartX, tabStartY),
+		"UI/assets/tab_template.png",
+		30.0f,
+		"" 
+	);
+
+	m_tabs.push_back(std::move(trigTab));
 
 	//экран
 	float screenOffsetY = texHeight * 0.1f;
@@ -301,6 +315,10 @@ void CalculatorUI::Update(float deltaTime, sf::Vector2f mousePos)
 		child->Update(deltaTime, localMousePos);
 	}
 
+	for (auto& tab : m_tabs) {
+		tab->Update(deltaTime, localMousePos);
+	}
+
 	if (m_helpWindow && m_helpWindow->isOpen())
 	{
 		while (const std::optional event = m_helpWindow->pollEvent())
@@ -347,6 +365,10 @@ void CalculatorUI::HandleEvent(const sf::Event& event, const sf::RenderWindow& w
 		child->HandleEvent(event, window);
 	}
 
+	for (auto& tab : m_tabs) {
+		tab->HandleEvent(event, window);
+	}
+
 	if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>())
 	{
 		if (keyPressed->code == sf::Keyboard::Key::Left)
@@ -389,6 +411,11 @@ void CalculatorUI::HandleEvent(const sf::Event& event, const sf::RenderWindow& w
 void CalculatorUI::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	states.transform *= getTransform();
+
+	for (const auto& tab : m_tabs) {
+		target.draw(*tab, states);
+	}
+
 	target.draw(m_sprite, states);
 	for (const auto& child : children)
 	{

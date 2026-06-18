@@ -40,6 +40,7 @@ add_executable(AsciCalc
     "UI/layout/MathRow.cpp"
     "UI/layout/FractionNode.cpp"
     "UI/MathEditor.cpp"
+    "UI/CalculatorUITab.cpp"
 )
 
 
@@ -54,6 +55,7 @@ target_sources(AsciCalc
         "UI/CalculatorUI.ixx"
         "UI/UIElement.ixx"
         "UI/MathEditor.ixx"
+        "UI/CalculatorUITab.ixx"
     
         "UI/layout/IMathNode.ixx"
         "UI/layout/TextNode.ixx"
