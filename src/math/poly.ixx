@@ -61,8 +61,12 @@ public:
 
         std::string result;
 
+<<<<<<< HEAD
+        for (std::size_t index = 0; index < coefficients_.size(); ++index) {
+=======
         for (std::size_t power = coefficients_.size(); power > 0; --power) {
             const std::size_t index = power - 1;
+>>>>>>> main
             const Rational current = coefficients_[index];
 
             if (current.isZero()) {
@@ -143,6 +147,29 @@ public:
         return !(left == right);
     }
 
+<<<<<<< HEAD
+    [[nodiscard]] Polynomial derivative() const {
+        if (coefficients_.size() <= 1) {
+            return Polynomial{};
+        }
+        std::vector<Rational> result(coefficients_.size() - 1);
+        for (std::size_t i = 0; i < result.size(); ++i) {
+            result[i] = coefficients_[i + 1] * Rational{static_cast<long long>(i + 1)};
+        }
+        return Polynomial{std::move(result)};
+    }
+
+    [[nodiscard]] Polynomial integral() const {
+        std::vector<Rational> result(coefficients_.size() + 1);
+        result[0] = Rational{0};
+        for (std::size_t i = 1; i < result.size(); ++i) {
+            result[i] = coefficients_[i - 1] / Rational{static_cast<long long>(i)};
+        }
+        return Polynomial{std::move(result)};
+    }
+
+=======
+>>>>>>> main
 private:
     std::vector<Rational> coefficients_;
 

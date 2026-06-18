@@ -177,6 +177,64 @@ public:
         return !(left == right);
     }
 
+<<<<<<< HEAD
+    [[nodiscard]] Rational determinant() const {
+        if (!isSquare()) {
+            throw core::MathError("matrix must be square to calculate determinant");
+        }
+        if (empty()) {
+            return Rational{0};
+        }
+        const std::size_t n = rows_;
+        if (n == 1) {
+            return at(0, 0);
+        }
+        if (n == 2) {
+            return at(0, 0) * at(1, 1) - at(0, 1) * at(1, 0);
+        }
+
+        Matrix temp = *this;
+        Rational detVal{1};
+        bool sign = true; // true = +, false = -
+
+        for (std::size_t i = 0; i < n; ++i) {
+            // Find pivot
+            std::size_t pivot = i;
+            while (pivot < n && temp.at(pivot, i).isZero()) {
+                ++pivot;
+            }
+
+            if (pivot == n) {
+                return Rational{0};
+            }
+
+            if (pivot != i) {
+                // Swap rows i and pivot
+                for (std::size_t col = 0; col < n; ++col) {
+                    std::swap(temp.at(i, col), temp.at(pivot, col));
+                }
+                sign = !sign;
+            }
+
+            detVal = detVal * temp.at(i, i);
+
+            // Eliminate column elements below diagonal
+            for (std::size_t row = i + 1; row < n; ++row) {
+                if (temp.at(row, i).isZero()) {
+                    continue;
+                }
+                Rational factor = temp.at(row, i) / temp.at(i, i);
+                for (std::size_t col = i; col < n; ++col) {
+                    temp.at(row, col) = temp.at(row, col) - factor * temp.at(i, col);
+                }
+            }
+        }
+
+        return sign ? detVal : -detVal;
+    }
+
+=======
+>>>>>>> main
 private:
     std::size_t rows_ = 0;
     std::size_t cols_ = 0;

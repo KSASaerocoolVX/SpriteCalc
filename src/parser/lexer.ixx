@@ -24,6 +24,7 @@ enum class TokenKind {
     LeftParen,
     RightParen,
     Equal,
+    Caret,
     End
 };
 
@@ -90,6 +91,9 @@ public:
                     break;
                 case '=':
                     tokens.push_back({TokenKind::Equal, "="});
+                    break;
+                case '^':
+                    tokens.push_back({TokenKind::Caret, "^"});
                     break;
                 default:
                     throw core::SyntaxError("unexpected character: " + std::string{current});
@@ -165,13 +169,41 @@ private:
     }
 
     [[nodiscard]] Token readMatrix(std::string_view input, std::size_t& index) const {
-        // Заглушка: обработка обычных матриц отключена
-        throw core::SyntaxError("Matrix literals are not supported yet");
+        const auto start = index;
+        ++index; // skip '['
+        int openBrackets = 1;
+        while (index < input.size()) {
+            if (input[index] == '[') {
+                ++openBrackets;
+            } else if (input[index] == ']') {
+                --openBrackets;
+                if (openBrackets == 0) {
+                    ++index;
+                    return {TokenKind::Matrix, input.substr(start, index - start)};
+                }
+            }
+            ++index;
+        }
+        throw core::SyntaxError("unmatched '[' in matrix literal");
     }
 
     [[nodiscard]] Token readPolynomial(std::string_view input, std::size_t& index) const {
-        // Заглушка: обработка обычных полиномов отключена
-        throw core::SyntaxError("Polynomial literals are not supported yet");
+        const auto start = index;
+        ++index; // skip '{'
+        int openBraces = 1;
+        while (index < input.size()) {
+            if (input[index] == '{') {
+                ++openBraces;
+            } else if (input[index] == '}') {
+                --openBraces;
+                if (openBraces == 0) {
+                    ++index;
+                    return {TokenKind::Polynomial, input.substr(start, index - start)};
+                }
+            }
+            ++index;
+        }
+        throw core::SyntaxError("unmatched '{' in polynomial literal");
     }
 
     [[nodiscard]] Token readIdentifier(std::string_view input, std::size_t& index) const {

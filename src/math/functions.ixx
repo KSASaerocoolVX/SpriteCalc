@@ -52,4 +52,8 @@ export namespace math {
         return value.inverse();
     }
 
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> main

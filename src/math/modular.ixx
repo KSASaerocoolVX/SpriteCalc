@@ -58,7 +58,11 @@ public:
     friend Modular operator*(const Modular& left, const Modular& right) {
         checkSameMod(left, right);
         return Modular{
+<<<<<<< HEAD
+            modMul(left.value_, right.value_, left.mod_),
+=======
             static_cast<long long>((__int128)left.value_ * right.value_ % left.mod_),
+>>>>>>> main
             left.mod_
         };
     }
