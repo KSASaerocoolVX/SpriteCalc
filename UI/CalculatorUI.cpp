@@ -21,6 +21,7 @@ import FractionNode;
 import ExponentNode;
 import MathEditor;
 import app.help;
+import CalculatorUI;
 
 
 static std::string wrapText(const std::string& text, std::size_t maxCharsLine) {
@@ -87,11 +88,15 @@ std::string intToLabel(int index)
 	case 17: return "0";
 	case 18: return ">";
 	case 19: return "=";
+	case 20: return ".";
+	case 21: return "(";
+	case 22: return ")";
+	case 23: return "%";
 	default: return "P";
 	}
 }
 
-CalculatorUI::CalculatorUI() : m_sprite(AssetManager::Instance().GetTexture("UI/assets/calculator_empty.png"))
+CalculatorUI::CalculatorUI() : m_sprite(AssetManager::Instance().GetTexture("UI/assets/calculator_emptyExtended.png"))
 {
 
 	sf::Vector2u textureSize = m_sprite.getTexture().getSize();
@@ -120,7 +125,7 @@ CalculatorUI::CalculatorUI() : m_sprite(AssetManager::Instance().GetTexture("UI/
 
 	sf::Vector2u buttonSize = AssetManager::Instance().GetTexture("UI/assets/button_0.png").getSize();
 
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 6; i++)
 	{
 		for (int j = 0; j < 4; j++)
 		{
@@ -144,6 +149,58 @@ CalculatorUI::CalculatorUI() : m_sprite(AssetManager::Instance().GetTexture("UI/
 			children.push_back(std::move(button));
 		}
 	}
+
+	//вкладки
+	float tabStartX = texWidth * 0.925f;
+	float tabStartY = texHeight * 0.1f;
+
+	float handleW = 25.0f; 
+	float handleH = 34.0f; 
+	float handleY = 14.0f; 
+
+	auto trigTab = std::make_unique<CalculatorUITab>(
+		sf::Vector2f(tabStartX, texHeight * 0.1f),
+		"UI/assets/trig_tab.png",
+		handleW,
+		handleH,
+		handleY,
+		"" 
+	);
+
+	auto btnSin = std::make_unique<Button>(sf::Vector2f(offsetX, 15.f), "UI/assets/button_0.png", "UI/assets/button_1.png", "sin");
+	btnSin->onClick = [this]() { HandleButtonPress("sin"); };
+
+	auto btnCos = std::make_unique<Button>(sf::Vector2f(offsetX+ (buttonSize.x + paddingX), 15.f), "UI/assets/button_0.png", "UI/assets/button_1.png", "cos");
+	btnCos->onClick = [this]() { HandleButtonPress("cos"); };
+
+	auto btnTg = std::make_unique<Button>(sf::Vector2f(offsetX + (buttonSize.x + paddingX)*2, 15.f), "UI/assets/button_0.png", "UI/assets/button_1.png", "tan");
+	btnTg->onClick = [this]() { HandleButtonPress("tan"); };
+
+	trigTab->AddButton(std::move(btnSin));
+	trigTab->AddButton(std::move(btnCos));
+	trigTab->AddButton(std::move(btnTg));
+
+	auto linalTab = std::make_unique<CalculatorUITab>(
+		sf::Vector2f(tabStartX, texHeight * 0.3f),
+		"UI/assets/linal_tab.png",
+		handleW,
+		handleH,
+		handleY,
+		"" 
+	);
+
+	auto discrTab = std::make_unique<CalculatorUITab>(
+		sf::Vector2f(tabStartX, texHeight * 0.5f),
+		"UI/assets/discr_tab.png",
+		handleW,
+		handleH,
+		handleY,
+		"" 
+	);
+
+	m_tabs.push_back(std::move(trigTab));
+	m_tabs.push_back(std::move(linalTab));
+	m_tabs.push_back(std::move(discrTab));
 
 	//экран
 	float screenOffsetY = texHeight * 0.1f;
@@ -297,6 +354,10 @@ void CalculatorUI::Update(float deltaTime, sf::Vector2f mousePos)
 		child->Update(deltaTime, localMousePos);
 	}
 
+	for (auto& tab : m_tabs) {
+		tab->Update(deltaTime, localMousePos);
+	}
+
 	if (m_helpWindow && m_helpWindow->isOpen())
 	{
 		while (const std::optional event = m_helpWindow->pollEvent())
@@ -343,6 +404,10 @@ void CalculatorUI::HandleEvent(const sf::Event& event, const sf::RenderWindow& w
 		child->HandleEvent(event, window);
 	}
 
+	for (auto& tab : m_tabs) {
+		tab->HandleEvent(event, window);
+	}
+
 	if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>())
 	{
 		if (keyPressed->code == sf::Keyboard::Key::Left)
@@ -385,6 +450,11 @@ void CalculatorUI::HandleEvent(const sf::Event& event, const sf::RenderWindow& w
 void CalculatorUI::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	states.transform *= getTransform();
+
+	for (const auto& tab : m_tabs) {
+		target.draw(*tab, states);
+	}
+
 	target.draw(m_sprite, states);
 	for (const auto& child : children)
 	{

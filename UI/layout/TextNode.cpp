@@ -18,23 +18,10 @@ TextNode::TextNode(const std::string& text, unsigned int charSize, sf::Color col
     m_text.setScale(sf::Vector2f(0.25f, 0.25f));
 }
 
-void TextNode::AppendText(const std::string& append)
-{
-    m_text.setString(m_text.getString() + append);
-}
-
-bool TextNode::PopChar()
-{
-    std::string str = m_text.getString();
-    if (!str.empty() && !m_isOperator) {
-        str.pop_back();
-        m_text.setString(str);
-    }
-    return str.empty();
-}
 
 MathMetrics TextNode::Measure()
 {
+
     sf::FloatRect bounds = m_text.getLocalBounds();
     m_metrics.width = (bounds.position.x + bounds.size.x) * 0.25f;
     m_metrics.height = (bounds.position.y + bounds.size.y) * 0.25f;
