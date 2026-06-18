@@ -149,19 +149,8 @@ void MathEditor::MoveRight() {
 
 void MathEditor::Delete() {
     if (m_impl->m_currentIndex > 0) {
-        IMathNode* leftNode = static_cast<MathRow*>(m_impl->m_currentRow)->GetChild(m_impl->m_currentIndex - 1);
-
-        if (leftNode->IsText() && !leftNode->IsOperator()) {
-            TextNode* text = static_cast<TextNode*>(leftNode);
-            if (text->PopChar()) {
-                static_cast<MathRow*>(m_impl->m_currentRow)->RemoveChild(m_impl->m_currentIndex - 1);
-                m_impl->m_currentIndex--;
-            }
-        }
-        else {
-            static_cast<MathRow*>(m_impl->m_currentRow)->RemoveChild(m_impl->m_currentIndex - 1);
-            m_impl->m_currentIndex--;
-        }
+        static_cast<MathRow*>(m_impl->m_currentRow)->RemoveChild(m_impl->m_currentIndex - 1);
+        m_impl->m_currentIndex--;
     }
     else if (!m_impl->m_path.empty()) {
         MoveLeft();
@@ -170,16 +159,9 @@ void MathEditor::Delete() {
 }
 
 void MathEditor::InsertDigit(const std::string& digit) {
-    if (m_impl->m_currentIndex > 0) {
-        IMathNode* prev = static_cast<MathRow*>(m_impl->m_currentRow)->GetChild(m_impl->m_currentIndex - 1);
-        if (prev->IsText() && !prev->IsOperator()) {
-            static_cast<TextNode*>(prev)->AppendText(digit);
-            m_impl->RefreshCursor();
-            return;
-        }
-    }
     auto newNode = std::make_unique<TextNode>(digit, 56, sf::Color(75, 105, 47));
     static_cast<MathRow*>(m_impl->m_currentRow)->InsertChild(m_impl->m_currentIndex, std::move(newNode));
+
     m_impl->m_currentIndex++;
     m_impl->RefreshCursor();
 }
@@ -223,28 +205,11 @@ void MathEditor::InsertFraction() {
 }
 
 void MathEditor::InsertExponent() {
-    std::unique_ptr<IMathNode> baseContent;
-
-    if (m_impl->m_currentIndex > 0) {
-        IMathNode* prev = static_cast<MathRow*>(m_impl->m_currentRow)->GetChild(m_impl->m_currentIndex - 1);
-        if (prev && !prev->IsOperator()) {
-            baseContent = static_cast<MathRow*>(m_impl->m_currentRow)->RemoveChild(m_impl->m_currentIndex - 1);
-            m_impl->m_currentIndex--;
-        }
-    }
-
-    auto baseRow = std::make_unique<MathRow>();
-    if (baseContent) {
-        baseRow->AddChild(std::move(baseContent));
-    }
-    else {
-        baseRow->AddChild(std::make_unique<TextNode>(" ", 56, sf::Color(75, 105, 47)));
-    }
-
     auto powRow = std::make_unique<MathRow>();
     MathRow* ptrToPower = powRow.get();
 
-    auto exponent = std::make_unique<ExponentNode>(std::move(baseRow), std::move(powRow));
+    auto exponent = std::make_unique<ExponentNode>(std::move(powRow));
+
     static_cast<MathRow*>(m_impl->m_currentRow)->InsertChild(m_impl->m_currentIndex, std::move(exponent));
 
     m_impl->m_path.push_back({ m_impl->m_currentRow, m_impl->m_currentIndex });

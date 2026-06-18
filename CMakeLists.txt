@@ -12,19 +12,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SFML)
 
-add_executable(AsciCalc
-    "UI/main.cpp"
-    "UI/Background.cpp"
-    "UI/Button.cpp"
-    "UI/CalculatorUI.cpp"
-    "UI/InputScreen.cpp"
-    "UI/layout/TextNode.cpp"
- "UI/layout/ExponentNode.cpp"
- "UI/layout/MathRow.cpp"
-"UI/layout/FractionNode.cpp"
-"UI/MathEditor.cpp"
-)
-
 set(CORE_MODULE_FILES
     "src/core/context.ixx"
     "src/core/exceptions.ixx"
@@ -41,29 +28,39 @@ set(CORE_MODULE_FILES
     "src/app/help.ixx"
 )
 
-target_sources(AsciCalc
-    PRIVATE
-    FILE_SET CXX_MODULES FILES
-    ${CORE_MODULE_FILES}
-    
-    "UI/AssetManager.ixx"
-    "UI/Background.ixx"
-    "UI/Button.ixx"
-    "UI/InputScreen.ixx"
-    "UI/CalculatorUI.ixx"
-    "UI/UIElement.ixx"
-    
-    "UI/layout/IMathNode.ixx"
-    "UI/layout/TextNode.ixx"
-    "UI/layout/FractionNode.ixx"
-    "UI/layout/MathRow.ixx"
-    "UI/layout/ExponentNode.ixx"
-
-    "UI/MathEditor.ixx"
+#####gui
+add_executable(AsciCalc
+    "UI/main.cpp"
+    "UI/Background.cpp"
+    "UI/Button.cpp"
+    "UI/CalculatorUI.cpp"
+    "UI/InputScreen.cpp"
+    "UI/layout/TextNode.cpp"
+    "UI/layout/ExponentNode.cpp"
+    "UI/layout/MathRow.cpp"
+    "UI/layout/FractionNode.cpp"
+    "UI/MathEditor.cpp"
 )
 
 
-
+target_sources(AsciCalc
+    PRIVATE
+    FILE_SET CXX_MODULES FILES
+        ${CORE_MODULE_FILES}
+        "UI/AssetManager.ixx"
+        "UI/Background.ixx"
+        "UI/Button.ixx"
+        "UI/InputScreen.ixx"
+        "UI/CalculatorUI.ixx"
+        "UI/UIElement.ixx"
+        "UI/MathEditor.ixx"
+    
+        "UI/layout/IMathNode.ixx"
+        "UI/layout/TextNode.ixx"
+        "UI/layout/FractionNode.ixx"
+        "UI/layout/MathRow.ixx"
+        "UI/layout/ExponentNode.ixx"
+)
 
 add_custom_command(TARGET AsciCalc POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -78,6 +75,9 @@ add_custom_command(TARGET AsciCalc POST_BUILD
 )
 
 target_link_libraries(AsciCalc PRIVATE SFML::Graphics SFML::Window SFML::System)
+#####
+
+#####console
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT AsciCalc)
 
 add_executable(AsciCalcConsole

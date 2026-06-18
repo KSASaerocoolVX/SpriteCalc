@@ -87,11 +87,15 @@ std::string intToLabel(int index)
 	case 17: return "0";
 	case 18: return ">";
 	case 19: return "=";
+	case 20: return ".";
+	case 21: return "(";
+	case 22: return ")";
+	case 23: return "%";
 	default: return "P";
 	}
 }
 
-CalculatorUI::CalculatorUI() : m_sprite(AssetManager::Instance().GetTexture("UI/assets/calculator_empty.png"))
+CalculatorUI::CalculatorUI() : m_sprite(AssetManager::Instance().GetTexture("UI/assets/calculator_emptyExtended.png"))
 {
 
 	sf::Vector2u textureSize = m_sprite.getTexture().getSize();
@@ -120,7 +124,7 @@ CalculatorUI::CalculatorUI() : m_sprite(AssetManager::Instance().GetTexture("UI/
 
 	sf::Vector2u buttonSize = AssetManager::Instance().GetTexture("UI/assets/button_0.png").getSize();
 
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 6; i++)
 	{
 		for (int j = 0; j < 4; j++)
 		{
