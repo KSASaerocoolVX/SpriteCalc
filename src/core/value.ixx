@@ -162,4 +162,119 @@ private:
     throw MathError("operation not supported");
 }
 
+[[nodiscard]] Value power(const Value& left, const Value& right) {
+    long long n = 0;
+    bool validExponent = false;
+    if (right.isRational()) {
+        if (right.asRational().denominator() == 1) {
+            n = right.asRational().numerator();
+            validExponent = true;
+        }
+    } else if (right.isComplex()) {
+        if (right.asComplex().isReal()) {
+            if (right.asComplex().real().denominator() == 1) {
+                n = right.asComplex().real().numerator();
+                validExponent = true;
+            }
+        }
+    }
+
+    if (!validExponent) {
+        throw MathError("exponent must be an integer");
+    }
+
+    if (left.isRational()) {
+        auto base = left.asRational();
+        if (n == 0) {
+            return Value(math::Rational(1));
+        }
+        if (n < 0) {
+            if (base.isZero()) {
+                throw MathError("division by zero in power calculation");
+            }
+            base = math::Rational(base.denominator(), base.numerator());
+            n = -n;
+        }
+        math::Rational result(1);
+        math::Rational cur = base;
+        while (n > 0) {
+            if (n % 2 == 1) {
+                result = result * cur;
+            }
+            cur = cur * cur;
+            n /= 2;
+        }
+        return Value(result);
+    }
+    
+    if (left.isComplex()) {
+        auto base = left.asComplex();
+        if (n == 0) {
+            return Value(math::Complex(math::Rational(1)));
+        }
+        if (n < 0) {
+            if (base.isZero()) {
+                throw MathError("division by zero in power calculation");
+            }
+            base = math::Complex(math::Rational(1)) / base;
+            n = -n;
+        }
+        math::Complex result(math::Rational(1));
+        math::Complex cur = base;
+        while (n > 0) {
+            if (n % 2 == 1) {
+                result = result * cur;
+            }
+            cur = cur * cur;
+            n /= 2;
+        }
+        return Value(result);
+    }
+
+    if (left.isMatrix()) {
+        auto base = left.asMatrix();
+        if (!base.isSquare()) {
+            throw MathError("only square matrices can be raised to a power");
+        }
+        if (n < 0) {
+            throw MathError("negative matrix powers are not supported");
+        }
+        if (n == 0) {
+            return Value(math::Matrix::identity(base.rows()));
+        }
+        math::Matrix result = math::Matrix::identity(base.rows());
+        math::Matrix cur = base;
+        while (n > 0) {
+            if (n % 2 == 1) {
+                result = result * cur;
+            }
+            cur = cur * cur;
+            n /= 2;
+        }
+        return Value(result);
+    }
+
+    if (left.isPolynomial()) {
+        auto base = left.asPolynomial();
+        if (n < 0) {
+            throw MathError("polynomials cannot be raised to a negative power");
+        }
+        if (n == 0) {
+            return Value(math::Polynomial({math::Rational(1)}));
+        }
+        math::Polynomial result({math::Rational(1)});
+        math::Polynomial cur = base;
+        while (n > 0) {
+            if (n % 2 == 1) {
+                result = result * cur;
+            }
+            cur = cur * cur;
+            n /= 2;
+        }
+        return Value(result);
+    }
+
+    throw MathError("power operation not supported for this type");
+}
+
 }

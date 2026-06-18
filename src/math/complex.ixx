@@ -51,7 +51,16 @@ public:
         }
 
         if (real_.isZero()) {
+            if (imaginary_ == Rational(1)) return "i";
+            if (imaginary_ == Rational(-1)) return "-i";
             return imaginary_.toString() + "i";
+        }
+
+        if (imaginary_ == Rational(1)) {
+            return real_.toString() + " + i";
+        }
+        if (imaginary_ == Rational(-1)) {
+            return real_.toString() + " - i";
         }
 
         if (imaginary_ < Rational{0}) {

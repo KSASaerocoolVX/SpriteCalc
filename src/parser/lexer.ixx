@@ -24,6 +24,7 @@ enum class TokenKind {
     LeftParen,
     RightParen,
     Equal,
+    Caret,
     End
 };
 
@@ -90,6 +91,9 @@ public:
                     break;
                 case '=':
                     tokens.push_back({TokenKind::Equal, "="});
+                    break;
+                case '^':
+                    tokens.push_back({TokenKind::Caret, "^"});
                     break;
                 default:
                     throw core::SyntaxError("unexpected character: " + std::string{current});
