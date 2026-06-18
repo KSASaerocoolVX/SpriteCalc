@@ -151,17 +151,56 @@ CalculatorUI::CalculatorUI() : m_sprite(AssetManager::Instance().GetTexture("UI/
 	}
 
 	//вкладки
-	float tabStartX = texWidth * 0.88f;
-	float tabStartY = texHeight * 0.15f;
+	float tabStartX = texWidth * 0.925f;
+	float tabStartY = texHeight * 0.1f;
+
+	float handleW = 25.0f; 
+	float handleH = 34.0f; 
+	float handleY = 14.0f; 
 
 	auto trigTab = std::make_unique<CalculatorUITab>(
-		sf::Vector2f(tabStartX, tabStartY),
-		"UI/assets/tab_template.png",
-		30.0f,
+		sf::Vector2f(tabStartX, texHeight * 0.1f),
+		"UI/assets/trig_tab.png",
+		handleW,
+		handleH,
+		handleY,
+		"" 
+	);
+
+	auto btnSin = std::make_unique<Button>(sf::Vector2f(offsetX, 15.f), "UI/assets/button_0.png", "UI/assets/button_1.png", "sin");
+	btnSin->onClick = [this]() { HandleButtonPress("sin"); };
+
+	auto btnCos = std::make_unique<Button>(sf::Vector2f(offsetX+ (buttonSize.x + paddingX), 15.f), "UI/assets/button_0.png", "UI/assets/button_1.png", "cos");
+	btnCos->onClick = [this]() { HandleButtonPress("cos"); };
+
+	auto btnTg = std::make_unique<Button>(sf::Vector2f(offsetX + (buttonSize.x + paddingX)*2, 15.f), "UI/assets/button_0.png", "UI/assets/button_1.png", "tan");
+	btnTg->onClick = [this]() { HandleButtonPress("tan"); };
+
+	trigTab->AddButton(std::move(btnSin));
+	trigTab->AddButton(std::move(btnCos));
+	trigTab->AddButton(std::move(btnTg));
+
+	auto linalTab = std::make_unique<CalculatorUITab>(
+		sf::Vector2f(tabStartX, texHeight * 0.3f),
+		"UI/assets/linal_tab.png",
+		handleW,
+		handleH,
+		handleY,
+		"" 
+	);
+
+	auto discrTab = std::make_unique<CalculatorUITab>(
+		sf::Vector2f(tabStartX, texHeight * 0.5f),
+		"UI/assets/discr_tab.png",
+		handleW,
+		handleH,
+		handleY,
 		"" 
 	);
 
 	m_tabs.push_back(std::move(trigTab));
+	m_tabs.push_back(std::move(linalTab));
+	m_tabs.push_back(std::move(discrTab));
 
 	//экран
 	float screenOffsetY = texHeight * 0.1f;

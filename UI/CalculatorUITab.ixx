@@ -20,14 +20,18 @@ private:
     bool m_isOpen = false;
     float m_slideProgress = 0.0f;
 
-    float m_panelWidth;
+    bool m_isHandleHovered = false;
+
     float m_handleWidth;
+    float m_handleHeight;
+    float m_handleOffsetY;
+
+    float m_panelWidth;
     float m_panelHeight;
     sf::Vector2f m_basePosition;
 
 public:
-    CalculatorUITab(sf::Vector2f basePosition, const std::string& texturePath, float handleWidth, const std::string& label);
-
+    CalculatorUITab(sf::Vector2f basePosition, const std::string& texturePath, float handleWidth, float handleHeight, float handleOffsetY, const std::string& label);
     void AddButton(std::unique_ptr<Button> button);
 
     void Update(float deltaTime, sf::Vector2f mousePos) override;
