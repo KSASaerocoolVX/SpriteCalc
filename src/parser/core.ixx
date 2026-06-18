@@ -2,11 +2,13 @@ module;
 
 #include <optional>
 #include <cstddef>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
 #include <vector>
+#include <stdexcept>
+#include <algorithm>
+#include <iostream>
 
 export module parser.core;
 
@@ -14,12 +16,10 @@ import core.context;
 import core.exceptions;
 import core.value;
 
-// Закомментированные неиспользуемые математические модули
-// import math.complex;
-// import math.functions;
-// import math.matrix;
-// import math.poly;
 import math.rational;
+import math.matrix;
+import math.poly;
+import math.number_theory;
 import parser.lexer;
 
 export namespace parser {
@@ -41,6 +41,109 @@ struct Instruction {
     core::Value value;
     std::size_t argumentCount = 0;
 };
+
+// Helper function to parse rational numbers (decimal or integer)
+inline math::Rational parseDecimalOrInt(const std::string& text) {
+    const auto dot = text.find('.');
+    if (dot == std::string::npos) {
+        return math::Rational(std::stoll(text));
+    }
+    std::string whole = text.substr(0, dot);
+    std::string frac = text.substr(dot + 1);
+    long long wholeVal = whole.empty() ? 0 : std::stoll(whole);
+    if (frac.empty()) {
+        return math::Rational(wholeVal);
+    }
+    long long fracVal = std::stoll(frac);
+    long long denom = 1;
+    for (std::size_t i = 0; i < frac.size(); ++i) {
+        denom *= 10;
+    }
+    math::Rational w(wholeVal);
+    math::Rational f(fracVal, denom);
+    return wholeVal >= 0 ? w + f : w - f;
+}
+
+// Helper function to parse matrix literals like [1,2;3,4]
+inline math::Matrix parseMatrix(std::string_view text) {
+    if (text.size() < 2 || text.front() != '[' || text.back() != ']') {
+        throw core::SyntaxError("invalid matrix syntax");
+    }
+    std::string_view inner = text.substr(1, text.size() - 2);
+    std::vector<std::vector<math::Rational>> rows;
+    std::size_t start = 0;
+    while (start < inner.size()) {
+        auto end = inner.find(';', start);
+        if (end == std::string_view::npos) {
+            end = inner.size();
+        }
+        std::string_view row_text = inner.substr(start, end - start);
+        std::vector<math::Rational> row;
+        std::size_t idx = 0;
+        while (idx < row_text.size()) {
+            while (idx < row_text.size() && (std::isspace(static_cast<unsigned char>(row_text[idx])) || row_text[idx] == ',')) {
+                ++idx;
+            }
+            if (idx >= row_text.size()) break;
+            std::size_t num_start = idx;
+            if (row_text[idx] == '-') {
+                ++idx;
+            }
+            while (idx < row_text.size() && (std::isdigit(static_cast<unsigned char>(row_text[idx])) || row_text[idx] == '.')) {
+                ++idx;
+            }
+            std::string num_str{row_text.substr(num_start, idx - num_start)};
+            row.push_back(parseDecimalOrInt(num_str));
+        }
+        if (!row.empty()) {
+            rows.push_back(std::move(row));
+        }
+        start = end + 1;
+    }
+    if (rows.empty()) {
+        throw core::SyntaxError("empty matrix");
+    }
+    std::size_t row_count = rows.size();
+    std::size_t col_count = rows[0].size();
+    for (const auto& r : rows) {
+        if (r.size() != col_count) {
+            throw core::SyntaxError("matrix rows must have the same number of columns");
+        }
+    }
+    math::Matrix m(row_count, col_count);
+    for (std::size_t r = 0; r < row_count; ++r) {
+        for (std::size_t c = 0; c < col_count; ++c) {
+            m.at(r, c) = rows[r][c];
+        }
+    }
+    return m;
+}
+
+// Helper function to parse polynomial literals like {1,2,3}
+inline math::Polynomial parsePolynomial(std::string_view text) {
+    if (text.size() < 2 || text.front() != '{' || text.back() != '}') {
+        throw core::SyntaxError("invalid polynomial syntax");
+    }
+    std::string_view inner = text.substr(1, text.size() - 2);
+    std::vector<math::Rational> coeffs;
+    std::size_t idx = 0;
+    while (idx < inner.size()) {
+        while (idx < inner.size() && (std::isspace(static_cast<unsigned char>(inner[idx])) || inner[idx] == ',')) {
+            ++idx;
+        }
+        if (idx >= inner.size()) break;
+        std::size_t num_start = idx;
+        if (inner[idx] == '-') {
+            ++idx;
+        }
+        while (idx < inner.size() && (std::isdigit(static_cast<unsigned char>(inner[idx])) || inner[idx] == '.')) {
+            ++idx;
+        }
+        std::string num_str{inner.substr(num_start, idx - num_start)};
+        coeffs.push_back(parseDecimalOrInt(num_str));
+    }
+    return math::Polynomial(std::move(coeffs));
+}
 
 class Statement {
 public:
@@ -66,8 +169,57 @@ public:
                     break;
                 }
                 case InstructionKind::Function: {
-                    // Заглушка: функции временно отключены
-                    throw core::SyntaxError("Functions are not supported yet");
+                    if (instruction.text == "phi") {
+                        if (instruction.argumentCount != 1) throw core::SyntaxError("phi expects 1 argument");
+                        ensureStackSize(stack, 1);
+                        const auto arg = popValue(stack);
+                        if (!arg.isRational()) throw core::MathError("phi expects an integer argument");
+                        long long val = arg.asRational().numerator();
+                        if (arg.asRational().denominator() != 1) throw core::MathError("phi expects an integer argument");
+                        stack.push_back(core::Value(math::Rational(math::phi(val))));
+                    }
+                    else if (instruction.text == "det") {
+                        if (instruction.argumentCount != 1) throw core::SyntaxError("det expects 1 argument");
+                        ensureStackSize(stack, 1);
+                        const auto arg = popValue(stack);
+                        if (!arg.isMatrix()) throw core::MathError("det expects a matrix argument");
+                        stack.push_back(core::Value(arg.asMatrix().determinant()));
+                    }
+                    else if (instruction.text == "derivative") {
+                        if (instruction.argumentCount != 1) throw core::SyntaxError("derivative expects 1 argument");
+                        ensureStackSize(stack, 1);
+                        const auto arg = popValue(stack);
+                        if (!arg.isPolynomial()) throw core::MathError("derivative expects a polynomial argument");
+                        stack.push_back(core::Value(arg.asPolynomial().derivative()));
+                    }
+                    else if (instruction.text == "integral") {
+                        if (instruction.argumentCount != 1) throw core::SyntaxError("integral expects 1 argument");
+                        ensureStackSize(stack, 1);
+                        const auto arg = popValue(stack);
+                        if (!arg.isPolynomial()) throw core::MathError("integral expects a polynomial argument");
+                        stack.push_back(core::Value(arg.asPolynomial().integral()));
+                    }
+                    else if (instruction.text == "gcd") {
+                        if (instruction.argumentCount != 2) throw core::SyntaxError("gcd expects 2 arguments");
+                        ensureStackSize(stack, 2);
+                        const auto right = popValue(stack);
+                        const auto left = popValue(stack);
+                        if (!left.isRational() || !right.isRational()) throw core::MathError("gcd expects integer arguments");
+                        if (left.asRational().denominator() != 1 || right.asRational().denominator() != 1) throw core::MathError("gcd expects integer arguments");
+                        stack.push_back(core::Value(math::Rational(math::gcd(left.asRational().numerator(), right.asRational().numerator()))));
+                    }
+                    else if (instruction.text == "lcm") {
+                        if (instruction.argumentCount != 2) throw core::SyntaxError("lcm expects 2 arguments");
+                        ensureStackSize(stack, 2);
+                        const auto right = popValue(stack);
+                        const auto left = popValue(stack);
+                        if (!left.isRational() || !right.isRational()) throw core::MathError("lcm expects integer arguments");
+                        if (left.asRational().denominator() != 1 || right.asRational().denominator() != 1) throw core::MathError("lcm expects integer arguments");
+                        stack.push_back(core::Value(math::Rational(math::lcm(left.asRational().numerator(), right.asRational().numerator()))));
+                    }
+                    else {
+                        throw core::SyntaxError("unknown function: " + instruction.text);
+                    }
                     break;
                 }
                 case InstructionKind::Add:
@@ -195,28 +347,26 @@ private:
             }
 
             if (token.kind == TokenKind::Matrix) {
-                // Заглушка: матрицы временно отключены
-                throw core::SyntaxError("Matrix operations are not supported yet");
+                ensureCanReadOperand(expectsOperand);
+                output.push_back({InstructionKind::Number, std::string{token.lexeme}, core::Value(parseMatrix(token.lexeme))});
+                markCurrentFunctionArgument(functions);
+                expectsOperand = false;
                 continue;
             }
 
             if (token.kind == TokenKind::Polynomial) {
-                // Заглушка: полиномы временно отключены
-                throw core::SyntaxError("Polynomial operations are not supported yet");
+                ensureCanReadOperand(expectsOperand);
+                output.push_back({InstructionKind::Number, std::string{token.lexeme}, core::Value(parsePolynomial(token.lexeme))});
+                markCurrentFunctionArgument(functions);
+                expectsOperand = false;
                 continue;
             }
 
             if (token.kind == TokenKind::Identifier) {
                 ensureCanReadOperand(expectsOperand);
                 if (isFunctionCall(tokens, index)) {
-                    // Заглушка: функции временно отключены
-                    throw core::SyntaxError("Functions are not supported yet");
-                    continue;
-                }
-
-                if (token.lexeme == "i") {
-                    // Заглушка: комплексные числа временно отключены
-                    throw core::SyntaxError("Complex numbers are not supported yet");
+                    operators.push_back(OperatorKind::Function);
+                    functions.push_back({std::string{token.lexeme}, 0, false});
                     continue;
                 }
 
@@ -457,23 +607,7 @@ private:
     }
 
     [[nodiscard]] Instruction makeNumberInstruction(const std::string& text) const {
-        // Парсим всё как Rational
-        //todo заменить
-        if (text.find('.') == std::string::npos) {
-            return {InstructionKind::Number, text, core::parseIntegerLiteral(text)};
-        }
-
-        try {
-            std::size_t parsed = 0;
-            const auto value = std::stod(text, &parsed);
-            if (parsed == text.size()) {
-                return {InstructionKind::Number, text, core::Value{value}};
-            }
-        } catch (const std::invalid_argument&) {
-        } catch (const std::out_of_range&) {
-        }
-
-        throw core::SyntaxError("invalid number literal: " + text);
+        return { InstructionKind::Number, text, core::Value(parseDecimalOrInt(text)) };
     }
 
     Lexer lexer_;

@@ -39,10 +39,18 @@ SelfTestResult runSelfTest()
     const std::vector<ValueCase> valueCases{
         {"2+2", "4"},
         {"2+3*4", "14"},
-        {"10/4", "2.5"},
+        {"10/4", "5/2"},
         {"-5+2", "-3"},
         {"1.5*2", "3"},
-        {"0.1+0.2", "0.3"},
+        {"0.1+0.2", "3/10"},
+        {"phi(10)", "4"},
+        {"phi(36)", "12"},
+        {"gcd(12, 18)", "6"},
+        {"lcm(12, 18)", "36"},
+        {"det([1,2;3,4])", "-2"},
+        {"[1,2;3,4] + [1,1;1,1]", "[2, 3]\n[4, 5]"},
+        {"derivative({1,2,3})", "2 + 6*x"},
+        {"integral({0,2})", "1*x^2"}
     };
 
     const std::vector<ErrorCase> errorCases{
@@ -50,6 +58,8 @@ SelfTestResult runSelfTest()
         {"2+"},
         {"2/0"},
         {"abc"},
+        {"det([1,2,3;4,5,6])"}, // not square
+        {"phi(1.5)"} // not integer
     };
 
     for (const auto& test : valueCases) {
