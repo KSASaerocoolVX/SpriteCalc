@@ -154,6 +154,14 @@ private:
     throw MathError("division is only supported for rational or complex numbers");
 }
 
+
+[[nodiscard]] Value modulo(const Value& left, const Value& right) {
+    if (left.isRational() && right.isRational()) {
+        return Value(left.asRational() % right.asRational());
+    }
+    throw MathError("modulo operation is only supported for integers");
+}
+
 [[nodiscard]] Value negate(const Value& val) {
     if (val.isRational()) return Value(-val.asRational());
     if (val.isComplex()) return Value(-val.asComplex());

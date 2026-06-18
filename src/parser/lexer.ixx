@@ -24,6 +24,7 @@ enum class TokenKind {
     LeftParen,
     RightParen,
     Equal,
+    Percent,
     Caret,
     End
 };
@@ -91,6 +92,9 @@ public:
                     break;
                 case '=':
                     tokens.push_back({TokenKind::Equal, "="});
+                    break;
+                case '%':
+                    tokens.push_back({TokenKind::Percent, "%"});
                     break;
                 case '^':
                     tokens.push_back({TokenKind::Caret, "^"});

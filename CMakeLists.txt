@@ -36,8 +36,13 @@ set(CORE_MODULE_FILES
     "src/math/complex.ixx"
     "src/math/number_theory.ixx"
     "src/math/functions.ixx"
-    "src/parser/core.ixx"
+    "src/math/dispatcher.ixx"
     "src/parser/lexer.ixx"
+    "src/parser/instructions.ixx"
+    "src/parser/literals.ixx"
+    "src/parser/evaluator.ixx"
+    "src/parser/parser_impl.ixx"
+    "src/parser/core.ixx"
     "src/app/help.ixx"
 )
 
