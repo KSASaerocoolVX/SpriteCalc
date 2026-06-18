@@ -10,6 +10,8 @@
 #include <string>
 #include <string_view>
 
+import app.help;
+
 namespace app {
 namespace {
 
@@ -34,31 +36,7 @@ bool isExitCommand(std::string_view input)
     return input == "q" || input == "quit" || input == "exit";
 }
 
-void printHelp(std::ostream& output)
-{
-    output
-        << "AsciCalc / SpriteCalc console REPL\n"
-        << "\n"
-        << "Supported now:\n"
-        << "  2 + 2             arithmetic\n"
-        << "  1 / 3 + 1 / 6     expression input with operator precedence\n"
-        << "  -5 + 2            negative numbers\n"
-        << "  1.5 * 2           decimal numbers\n"
-        << "  percent 50        percent helper, returns 0.5\n"
-        << "\n"
-        << "Commands:\n"
-        << "  help              show this help\n"
-        << "  vars              show stored variables\n"
-        << "  selftest          run built-in tests\n"
-        << "  test, tests       aliases for selftest\n"
-        << "  bench             run a tiny evaluator benchmark\n"
-        << "  clear             clear the last result\n"
-        << "  q, quit, exit     quit\n"
-        << "\n"
-        << "Planned by TZ.md, not enabled in this build yet:\n"
-        << "  phi(10), det([1,2;3,4]), matrices, polynomials, derivatives, integrals\n"
-        << "\n";
-}
+
 
 void printSelfTest(std::ostream& output)
 {
@@ -95,7 +73,7 @@ int Repl::run(std::istream& input, std::ostream& output)
     std::string line;
     std::string lastResult = "0";
 
-    printHelp(output);
+    printHelp(output, "");
 
     while (true) {
         output << "calc> ";
@@ -110,7 +88,13 @@ int Repl::run(std::istream& input, std::ostream& output)
         }
 
         if (line == "help") {
-            printHelp(output);
+            printHelp(output, "");
+            continue;
+        }
+
+        if (startsWith(line, "help ")) {
+            const auto topic = trim(std::string_view{line}.substr(5));
+            printHelp(output, topic);
             continue;
         }
 

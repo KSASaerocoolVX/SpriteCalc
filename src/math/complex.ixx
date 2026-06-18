@@ -1,14 +1,11 @@
 module;
 
-#include <cmath>
-#include <complex>
-#include <cstddef>
-#include <sstream>
 #include <string>
-#include <utility>
-#include <vector>
 
 export module math.complex;
+
+import core.exceptions;
+import math.rational;
 
 export namespace math {
 
@@ -16,87 +13,104 @@ class Complex {
 public:
     Complex() = default;
 
-    explicit Complex(double real)
-        : value_(real, 0.0) {}
+    Complex(Rational real)
+        : real_(real),
+          imaginary_(0) {}
 
-    Complex(double real, double imaginary)
-        : value_(real, imaginary) {}
+    Complex(Rational real, Rational imaginary)
+        : real_(real),
+          imaginary_(imaginary) {}
 
-    [[nodiscard]] double real() const noexcept {
-        return value_.real();
+    [[nodiscard]] const Rational& real() const noexcept {
+        return real_;
     }
 
-    [[nodiscard]] double imaginary() const noexcept {
-        return value_.imag();
+    [[nodiscard]] const Rational& imaginary() const noexcept {
+        return imaginary_;
     }
 
     [[nodiscard]] bool isReal() const noexcept {
-        return std::abs(value_.imag()) <= 1e-12;
+        return imaginary_.isZero();
+    }
+
+    [[nodiscard]] bool isZero() const noexcept {
+        return real_.isZero() && imaginary_.isZero();
+    }
+
+    [[nodiscard]] Complex conjugated() const {
+        return Complex{real_, -imaginary_};
+    }
+
+    [[nodiscard]] Rational normSquared() const {
+        return real_ * real_ + imaginary_ * imaginary_;
     }
 
     [[nodiscard]] std::string toString() const {
-        std::ostringstream output;
-        output << value_.real();
-
-        if (value_.imag() >= 0.0) {
-            output << "+";
+        if (imaginary_.isZero()) {
+            return real_.toString();
         }
 
-        output << value_.imag() << "i";
-        return output.str();
+        if (real_.isZero()) {
+            return imaginary_.toString() + "i";
+        }
+
+        if (imaginary_ < Rational{0}) {
+            return real_.toString() + " - " + (-imaginary_).toString() + "i";
+        }
+
+        return real_.toString() + " + " + imaginary_.toString() + "i";
     }
 
     friend Complex operator+(const Complex& left, const Complex& right) {
-        return Complex{left.value_ + right.value_};
+        return Complex{
+            left.real_ + right.real_,
+            left.imaginary_ + right.imaginary_
+        };
     }
 
     friend Complex operator-(const Complex& left, const Complex& right) {
-        return Complex{left.value_ - right.value_};
+        return Complex{
+            left.real_ - right.real_,
+            left.imaginary_ - right.imaginary_
+        };
     }
 
     friend Complex operator-(const Complex& value) {
-        return Complex{-value.value_};
+        return Complex{-value.real_, -value.imaginary_};
     }
 
     friend Complex operator*(const Complex& left, const Complex& right) {
-        return Complex{left.value_ * right.value_};
+        return Complex{
+            left.real_ * right.real_ - left.imaginary_ * right.imaginary_,
+            left.real_ * right.imaginary_ + left.imaginary_ * right.real_
+        };
     }
 
     friend Complex operator/(const Complex& left, const Complex& right) {
-        return Complex{left.value_ / right.value_};
-    }
-
-private:
-    explicit Complex(std::complex<double> value)
-        : value_(value) {}
-
-    std::complex<double> value_ = {};
-};
-
-class ComplexList {
-public:
-    ComplexList() = default;
-
-    explicit ComplexList(std::vector<Complex> values)
-        : values_(std::move(values)) {}
-
-    [[nodiscard]] std::string toString() const {
-        std::string result = "[";
-
-        for (std::size_t index = 0; index < values_.size(); ++index) {
-            if (index != 0) {
-                result += ", ";
-            }
-
-            result += values_[index].toString();
+        if (right.isZero()) {
+            throw core::MathError("division by zero");
         }
 
-        result += "]";
-        return result;
+        const Rational denominator = right.normSquared();
+
+        return Complex{
+            (left.real_ * right.real_ + left.imaginary_ * right.imaginary_) / denominator,
+            (left.imaginary_ * right.real_ - left.real_ * right.imaginary_) / denominator
+        };
+    }
+
+    friend bool operator==(const Complex& left, const Complex& right) noexcept {
+        return left.real_ == right.real_
+            && left.imaginary_ == right.imaginary_;
+    }
+
+    friend bool operator!=(const Complex& left, const Complex& right) noexcept {
+        return !(left == right);
     }
 
 private:
-    std::vector<Complex> values_;
+    Rational real_;
+    Rational imaginary_;
 };
 
 }
