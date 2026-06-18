@@ -5,6 +5,7 @@ module;
 
 export module core.value;
 import math.rational;
+import math.complex;
 import math.matrix;
 import math.poly;
 import core.exceptions;
@@ -15,12 +16,16 @@ class Value {
 public:
     Value() : data_(math::Rational(0)) {}
     Value(math::Rational r) : data_(r) {}
+    Value(math::Complex c) : data_(c) {}
     Value(math::Matrix m) : data_(m) {}
     Value(math::Polynomial p) : data_(p) {}
-    Value(std::string s) : data_(std::move(s)) {}
 
     [[nodiscard]] bool isRational() const noexcept {
         return std::holds_alternative<math::Rational>(data_);
+    }
+
+    [[nodiscard]] bool isComplex() const noexcept {
+        return std::holds_alternative<math::Complex>(data_);
     }
 
     [[nodiscard]] bool isMatrix() const noexcept {
@@ -31,12 +36,12 @@ public:
         return std::holds_alternative<math::Polynomial>(data_);
     }
 
-    [[nodiscard]] bool isString() const noexcept {
-        return std::holds_alternative<std::string>(data_);
-    }
-
     [[nodiscard]] math::Rational asRational() const {
         return std::get<math::Rational>(data_);
+    }
+
+    [[nodiscard]] math::Complex asComplex() const {
+        return std::get<math::Complex>(data_);
     }
 
     [[nodiscard]] math::Matrix asMatrix() const {
@@ -47,27 +52,26 @@ public:
         return std::get<math::Polynomial>(data_);
     }
 
-    [[nodiscard]] std::string asString() const {
-        return std::get<std::string>(data_);
-    }
-
     [[nodiscard]] std::string toString() const {
-        struct Visitor {
-            std::string operator()(const math::Rational& val) const { return val.toString(); }
-            std::string operator()(const math::Matrix& val) const { return val.toString(); }
-            std::string operator()(const math::Polynomial& val) const { return val.toString(); }
-            std::string operator()(const std::string& val) const { return val; }
-        };
-        return std::visit(Visitor{}, data_);
+        return std::visit([](const auto& val) { return val.toString(); }, data_);
     }
 
 private:
-    std::variant<math::Rational, math::Matrix, math::Polynomial, std::string> data_;
+    std::variant<math::Rational, math::Complex, math::Matrix, math::Polynomial> data_;
 };
 
 [[nodiscard]] Value add(const Value& left, const Value& right) {
     if (left.isRational() && right.isRational()) {
         return Value(left.asRational() + right.asRational());
+    }
+    if (left.isComplex() && right.isComplex()) {
+        return Value(left.asComplex() + right.asComplex());
+    }
+    if (left.isComplex() && right.isRational()) {
+        return Value(left.asComplex() + math::Complex(right.asRational()));
+    }
+    if (left.isRational() && right.isComplex()) {
+        return Value(math::Complex(left.asRational()) + right.asComplex());
     }
     if (left.isMatrix() && right.isMatrix()) {
         return Value(left.asMatrix() + right.asMatrix());
@@ -82,6 +86,15 @@ private:
     if (left.isRational() && right.isRational()) {
         return Value(left.asRational() - right.asRational());
     }
+    if (left.isComplex() && right.isComplex()) {
+        return Value(left.asComplex() - right.asComplex());
+    }
+    if (left.isComplex() && right.isRational()) {
+        return Value(left.asComplex() - math::Complex(right.asRational()));
+    }
+    if (left.isRational() && right.isComplex()) {
+        return Value(math::Complex(left.asRational()) - right.asComplex());
+    }
     if (left.isMatrix() && right.isMatrix()) {
         return Value(left.asMatrix() - right.asMatrix());
     }
@@ -94,6 +107,15 @@ private:
 [[nodiscard]] Value multiply(const Value& left, const Value& right) {
     if (left.isRational() && right.isRational()) {
         return Value(left.asRational() * right.asRational());
+    }
+    if (left.isComplex() && right.isComplex()) {
+        return Value(left.asComplex() * right.asComplex());
+    }
+    if (left.isComplex() && right.isRational()) {
+        return Value(left.asComplex() * math::Complex(right.asRational()));
+    }
+    if (left.isRational() && right.isComplex()) {
+        return Value(math::Complex(left.asRational()) * right.asComplex());
     }
     if (left.isMatrix() && right.isMatrix()) {
         return Value(left.asMatrix() * right.asMatrix());
@@ -120,11 +142,21 @@ private:
     if (left.isRational() && right.isRational()) {
         return Value(left.asRational() / right.asRational());
     }
-    throw MathError("division is only supported for rational numbers");
+    if (left.isComplex() && right.isComplex()) {
+        return Value(left.asComplex() / right.asComplex());
+    }
+    if (left.isComplex() && right.isRational()) {
+        return Value(left.asComplex() / math::Complex(right.asRational()));
+    }
+    if (left.isRational() && right.isComplex()) {
+        return Value(math::Complex(left.asRational()) / right.asComplex());
+    }
+    throw MathError("division is only supported for rational or complex numbers");
 }
 
 [[nodiscard]] Value negate(const Value& val) {
     if (val.isRational()) return Value(-val.asRational());
+    if (val.isComplex()) return Value(-val.asComplex());
     if (val.isMatrix()) return Value(-val.asMatrix());
     if (val.isPolynomial()) return Value(-val.asPolynomial());
     throw MathError("operation not supported");
