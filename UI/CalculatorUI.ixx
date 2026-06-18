@@ -6,23 +6,21 @@ module;
 
 export module CalculatorUI;
 
-import ITransformable;
+import UIElement;
 import Button;
 import InputScreen;
+import MathEditor;
+import TextNode;
+import IMathNode;
 
-export class CalculatorUI : public ITransformable
+export class CalculatorUI : public UIElement
 {
 private:
-    sf::Texture m_texture;
-    sf::Texture m_buttonIdleTexture;
-    sf::Texture m_buttonHoverTexture;
-    sf::Texture m_infoTexture;
-    sf::Texture m_bigIntTexture;
-    sf::Texture m_inputScreenTexture;
+    MathEditor m_editor;
+    std::unique_ptr<IMathNode> m_lastAnswer;
 
     sf::Sprite m_sprite;
-    sf::Font m_font;
-    std::vector<std::unique_ptr<ITransformable>> children;
+    std::vector<std::unique_ptr<UIElement>> children;
 
     std::string m_inputBuffer;
     InputScreen* m_screenRef = nullptr; 
@@ -30,14 +28,13 @@ private:
     void HandleButtonPress(const std::string& label);
 
 public:
-    CalculatorUI(sf::Vector2f position);
+    //CalculatorUI(sf::Vector2f position);
 
-    virtual void Draw(sf::RenderWindow& window);
+    CalculatorUI();
 
-    virtual void HandleEvent(const sf::Event& event, const sf::RenderWindow& window) override;
+    void Update(float deltaTime, sf::Vector2f mousePos) override;
+    void HandleEvent(const sf::Event& event, const sf::RenderWindow& window) override;
 
-    virtual void UpdateTransform(sf::Vector2f targetPosition, sf::Vector2f targetScale);
+    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
-    void SetPosition(sf::Vector2f targetPosition);
-    void SetScale(sf::Vector2f targetScale);
 };

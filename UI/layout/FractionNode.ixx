@@ -6,30 +6,36 @@ module;
 export module FractionNode;
 
 import IMathNode;
+import MathRow; 
 
 export class FractionNode : public IMathNode
 {
 private:
-	std::unique_ptr<IMathNode> m_numerator;
-	std::unique_ptr<IMathNode> m_denominator;
+    std::unique_ptr<MathRow> m_numerator;
+    std::unique_ptr<MathRow> m_denominator;
 
-	sf::RectangleShape m_bar;
-	sf::Vector2f m_barLocalPos;
+    sf::RectangleShape m_bar;
 
-	MathMetrics m_metrics;
-	sf::Vector2f m_localPosition;
-
-	float m_padding = 4.0f;
-	float m_barThickness = 2.0f;
+    float m_padding = 4.0f;
+    float m_barThickness = 1.0f;
 
 public:
-	FractionNode(std::unique_ptr<IMathNode> top, std::unique_ptr<IMathNode> bottom);
+    FractionNode(std::unique_ptr<MathRow> top, std::unique_ptr<MathRow> bottom);
 
-	MathMetrics Measure() override;
-	void Arrange(sf::Vector2f position) override;
+    MathMetrics Measure() override;
+    void Arrange() override;
 
-	void UpdateTransform(sf::Vector2f parentPosition, sf::Vector2f parentScale) override;
-	void Draw(sf::RenderWindow& window) override;
-	void HandleEvent(const sf::Event& event, const sf::RenderWindow& window) override;
+    void Update(float deltaTime, sf::Vector2f mousePos) override;
+    void HandleEvent(const sf::Event& event, const sf::RenderWindow& window) override;
+    std::string ToString() const override;
 
+    std::vector<MathRow*> GetInteractableRows() override {
+        std::vector<MathRow*> rows;
+        if (m_numerator) rows.push_back(m_numerator.get());
+        if (m_denominator) rows.push_back(m_denominator.get());
+        return rows;
+    }
+
+protected:
+    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 };

@@ -11,17 +11,22 @@ export class TextNode : public IMathNode
 {
 private:
     sf::Text m_text;
-    MathMetrics m_metrics;
-    sf::Vector2f m_localPosition;
+    bool m_isOperator;
 
 public:
-    TextNode(const std::string& text, const sf::Font& font, unsigned int charSize = 56);
+    TextNode(const std::string& text, unsigned int charSize = 56, sf::Color color = sf::Color(75, 105, 47), bool isOperator = false);
+
+    void AppendText(const std::string& append);
+    bool PopChar(); //для удаления true если пустой
 
     MathMetrics Measure() override;
-    void Arrange(sf::Vector2f position) override;
+    void Arrange() override;
+    std::string ToString() const override;
 
-    void UpdateTransform(sf::Vector2f parentPosition, sf::Vector2f parentScale) override;
-    void Draw(sf::RenderWindow& window) override;
+    bool IsOperator() const override { return m_isOperator; }
+    bool IsText() const override { return true; }
 
-    void HandleEvent(const sf::Event& event, const sf::RenderWindow& window) override;
+    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+
+
 };

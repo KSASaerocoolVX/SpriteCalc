@@ -5,102 +5,56 @@ module;
 #include <cmath>
 
 module Button;
-import InputScreen;
 
-Button::Button(sf::Vector2f localPosition, const sf::Texture& idleTexture, const sf::Texture& hoverTexture, const sf::Font& font, const std::string& label): m_sprite(idleTexture), m_text(font), m_label(label)
+import AssetManager;
+
+Button::Button(sf::Vector2f position, const std::string& idleTexPath, const std::string& hoverTexPath, const std::string& label): m_sprite(AssetManager::Instance().GetTexture(idleTexPath))
 {
-	m_idleTexture = &idleTexture;
-	m_hoverTexture = &hoverTexture;
+	setPosition(position);
 
-	m_localPosition = localPosition;
+	m_idleTexture = &AssetManager::Instance().GetTexture(idleTexPath);
+	m_hoverTexture = &AssetManager::Instance().GetTexture(hoverTexPath);
 
-	sf::Vector2u textureSize = idleTexture.getSize();
-
-	m_sprite.setPosition(localPosition);
-
-	m_text->setString(m_label);
-	m_text->setCharacterSize(56);
-	m_text->setScale(sf::Vector2f(0.25f, 0.25f));
-	m_text->setFillColor(textColor);
-
-	m_text->setPosition(localPosition);
+	if (!label.empty())
+	{
+		auto& font = AssetManager::Instance().GetFont("UI/assets/RetroGaming.ttf");
+		m_text.emplace(font);
+		m_text->setString(label);
+		m_text->setCharacterSize(56);
+		m_text->setScale(sf::Vector2f(0.25f, 0.25f));
+		m_text->setFillColor(sf::Color(99, 155, 255));
+		m_text->setPosition(sf::Vector2f(0.0f, 0.0f));
+	}
 }
 
-Button::Button(sf::Vector2f localPosition, const sf::Texture& idleTexture, const sf::Texture& hoverTexture) : m_sprite(idleTexture)
+void Button::Update(float deltaTime, sf::Vector2f mousePos)
 {
-	m_idleTexture = &idleTexture;
-	m_hoverTexture = &hoverTexture;
+	sf::FloatRect bounds = getTransform().transformRect(m_sprite.getLocalBounds());
+	isHovered = bounds.contains(mousePos);
 
-	m_localPosition = localPosition;
-
-	m_sprite.setPosition(localPosition);
-}
-
-void Button::Draw(sf::RenderWindow& window)
-{
-	auto mousePos = sf::Mouse::getPosition(window);
-
-	sf::Vector2f mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
-
-
-	if (m_sprite.getGlobalBounds().contains(mousePosF))
-		isHovered = true;
-	else
-		isHovered = false;
-
-	if (isHovered)
-	{
-		m_sprite.setTexture(*m_hoverTexture);
-	}
-	else
-	{
-		m_sprite.setTexture(*m_idleTexture);
-	}
-
-	window.draw(m_sprite);
-	if (m_text.has_value())
-	{
-		window.draw(*m_text);
-	}
-
-}
-
-void Button::UpdateTransform(sf::Vector2f parentPosition, sf::Vector2f parentScale)
-{
-	float xPos = parentPosition.x + (m_localPosition.x * parentScale.x);
-	float yPos = parentPosition.y + (m_localPosition.y * parentScale.y);
-
-	m_sprite.setPosition(sf::Vector2f(xPos,yPos));
-	m_sprite.setScale(sf::Vector2f(parentScale.x, parentScale.y));
-
-	if (m_text.has_value())
-	{
-		m_text->setPosition(sf::Vector2f(xPos, yPos));
-		float textScaleX = parentScale.x * 0.25f;
-		float textScaleY = parentScale.y * 0.25f;
-
-		m_text->setScale(sf::Vector2f(textScaleX, textScaleY));
-	}
+	m_sprite.setTexture(isHovered ? *m_hoverTexture : *m_idleTexture);
 }
 
 void Button::HandleEvent(const sf::Event& event, const sf::RenderWindow& window)
 {
 	if (const auto* mouseClick = event.getIf<sf::Event::MouseButtonReleased>())
 	{
-		sf::Vector2f mousePos = window.mapPixelToCoords(mouseClick->position);
-
-		if (m_sprite.getGlobalBounds().contains(mousePos))
+		if (mouseClick->button == sf::Mouse::Button::Left && isHovered)
 		{
-			if (onClick) {
-				onClick();
-				std::cout << "smth" << std::endl;
-			}
+			if (onClick) onClick();
 		}
 	}
 }
 
-
-void Button::PrintLabel()
+void Button::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-	std::cout << "clicked on" << m_label << std::endl;
+	states.transform *= getTransform();
+
+	target.draw(m_sprite, states);
+	if (m_text.has_value())
+	{
+		target.draw(*m_text, states);
+	}
 }
+
+

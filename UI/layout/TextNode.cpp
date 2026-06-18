@@ -5,49 +5,60 @@ module;
 #include <cmath>
 
 module TextNode;
+import AssetManager;
 
 //
-TextNode::TextNode(const std::string& text, const sf::Font& font, unsigned int charSize): m_text(font)
+
+TextNode::TextNode(const std::string& text, unsigned int charSize, sf::Color color, bool isOperator) : m_text(AssetManager::Instance().GetFont("UI/assets/RetroGaming.ttf")), m_isOperator(isOperator)
 {
     m_text.setString(text);
     m_text.setCharacterSize(charSize);
-    m_text.setFillColor(sf::Color(75, 105, 47));
+    m_text.setFillColor(color);
+
+    m_text.setScale(sf::Vector2f(0.25f, 0.25f));
+}
+
+void TextNode::AppendText(const std::string& append)
+{
+    m_text.setString(m_text.getString() + append);
+}
+
+bool TextNode::PopChar()
+{
+    std::string str = m_text.getString();
+    if (!str.empty() && !m_isOperator) {
+        str.pop_back();
+        m_text.setString(str);
+    }
+    return str.empty();
 }
 
 MathMetrics TextNode::Measure()
 {
     sf::FloatRect bounds = m_text.getLocalBounds();
+    m_metrics.width = (bounds.position.x + bounds.size.x) * 0.25f;
 
-    m_metrics.width = bounds.size.x * 0.25f;
-    m_metrics.height = bounds.size.y * 0.25f;
+    float fixedHeight = m_text.getCharacterSize() * 0.25f;
+    m_metrics.height = fixedHeight;
 
-    m_metrics.baselineY = bounds.size.y * 0.25f;
+    m_metrics.baselineY = fixedHeight * 0.5f;
 
     return m_metrics;
 }
 
-void TextNode::Arrange(sf::Vector2f position)
+void TextNode::Arrange()
 {
-    m_localPosition = position;
 }
 
-void TextNode::UpdateTransform(sf::Vector2f parentPosition, sf::Vector2f parentScale)
+
+
+std::string TextNode::ToString() const
 {
-    float xPos = std::round(parentPosition.x + (m_localPosition.x * parentScale.x));
-    float yPos = std::round(parentPosition.y + (m_localPosition.y * parentScale.y));
-
-    m_text.setPosition(sf::Vector2f(xPos, yPos));
-
-    float scaleX = parentScale.x * 0.25f;
-    float scaleY = parentScale.y * 0.25f;
-    m_text.setScale(sf::Vector2f(scaleX, scaleY));
+    return m_text.getString();
 }
 
-void TextNode::Draw(sf::RenderWindow& window)
+void TextNode::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-    window.draw(m_text);
-}
-
-void TextNode::HandleEvent(const sf::Event& event, const sf::RenderWindow& window)
-{
+    states.transform *= getTransform();
+    target.draw(m_text, states);
 }
