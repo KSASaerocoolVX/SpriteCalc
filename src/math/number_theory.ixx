@@ -92,6 +92,26 @@ struct ExtendedGcdResult {
     return value;
 }
 
+[[nodiscard]] long long modMul(long long a, long long b, long long mod) {
+    if (mod <= 0) {
+        throw core::MathError("modulus must be positive");
+    }
+    a = modNormalize(a, mod);
+    b = modNormalize(b, mod);
+    if (mod <= 3037000499LL) {
+        return (a * b) % mod;
+    }
+    long long result = 0;
+    while (b > 0) {
+        if (b % 2 == 1) {
+            result = (result + a) % mod;
+        }
+        a = (a + a) % mod;
+        b /= 2;
+    }
+    return result;
+}
+
 [[nodiscard]] long long modPow(long long base, long long exponent, long long mod) {
     if (mod <= 0) {
         throw core::MathError("modulus must be positive");
@@ -106,10 +126,10 @@ struct ExtendedGcdResult {
 
     while (exponent > 0) {
         if (exponent % 2 == 1) {
-            result = static_cast<long long>((__int128)result * base % mod);
+            result = modMul(result, base, mod);
         }
 
-        base = static_cast<long long>((__int128)base * base % mod);
+        base = modMul(base, base, mod);
         exponent /= 2;
     }
 
@@ -150,6 +170,25 @@ struct ExtendedGcdResult {
     }
 
     return true;
+}
+
+[[nodiscard]] long long phi(long long n) {
+    if (n < 1) {
+        return 0;
+    }
+    long long result = n;
+    for (long long i = 2; i * i <= n; i++) {
+        if (n % i == 0) {
+            while (n % i == 0) {
+                n /= i;
+            }
+            result -= result / i;
+        }
+    }
+    if (n > 1) {
+        result -= result / n;
+    }
+    return result;
 }
 
 }
