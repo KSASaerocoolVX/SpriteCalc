@@ -36,4 +36,12 @@ std::string evaluateToString(const std::string& expression)
     return result.toString();
 }
 
+std::string evaluateToString(const std::string& expression, core::Context& ctx)
+{
+    parser::Parser calcParser;
+    auto statement = calcParser.parse(expression);
+    core::Value result = statement.evaluate(ctx);
+    return result.toString();
+}
+
 }

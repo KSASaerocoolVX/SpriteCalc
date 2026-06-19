@@ -11,6 +11,7 @@
 #include <string_view>
 
 import app.help;
+import core.context;
 
 namespace app {
 namespace {
@@ -72,6 +73,7 @@ int Repl::run(std::istream& input, std::ostream& output)
 {
     std::string line;
     std::string lastResult = "0";
+    core::Context ctx;
 
     printHelp(output, "");
 
@@ -99,7 +101,14 @@ int Repl::run(std::istream& input, std::ostream& output)
         }
 
         if (line == "vars") {
-            output << "vars: no variables are stored yet\n";
+            const auto& variables = ctx.variables();
+            if (variables.empty()) {
+                output << "vars: no variables are stored yet\n";
+            } else {
+                for (const auto& [name, value] : variables) {
+                    output << name << " = " << value.toString() << "\n";
+                }
+            }
             continue;
         }
 
@@ -115,6 +124,7 @@ int Repl::run(std::istream& input, std::ostream& output)
 
         if (line == "clear" || line == "AC" || line == "ac") {
             lastResult = "0";
+            ctx.clear();
             output << lastResult << "\n";
             continue;
         }
@@ -124,7 +134,7 @@ int Repl::run(std::istream& input, std::ostream& output)
                 const auto expression = trim(std::string_view{line}.substr(8));
                 lastResult = calc::formatResult(calc::evaluateExpression(expression) / 100.0);
             } else {
-                lastResult = calc::evaluateToString(line);
+                lastResult = calc::evaluateToString(line, ctx);
             }
 
             output << lastResult << "\n";
