@@ -104,6 +104,17 @@ private:
     };
 }
 
+
+[[nodiscard]] Rational operator%(const Rational& left, const Rational& right) {
+    if (left.denominator() != 1 || right.denominator() != 1) {
+        throw core::MathError("modulo operator (%) expects integer arguments");
+    }
+    if (right.isZero()) {
+        throw core::MathError("modulo by zero");
+    }
+    return { left.numerator() % right.numerator(), 1 };
+}
+
 [[nodiscard]] bool operator==(const Rational& left, const Rational& right) noexcept {
     return left.numerator() == right.numerator()
         && left.denominator() == right.denominator();
@@ -130,7 +141,7 @@ private:
     return !(left < right);
 }
 
-//todo это заменить
+//todo  
 [[nodiscard]] Rational parseRationalLiteral(const std::string& text) { return Rational(0); }
 
 

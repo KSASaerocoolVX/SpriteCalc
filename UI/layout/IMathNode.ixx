@@ -11,8 +11,6 @@ export struct MathMetrics {
     float baselineY;
 };
 
-export class MathRow; 
-
 export class IMathNode : public UIElement
 {
 public:
@@ -23,7 +21,7 @@ public:
     virtual MathMetrics Measure() = 0;
     virtual void Arrange() = 0;
 
-    virtual std::vector<MathRow*> GetInteractableRows() { return {}; }
+    virtual std::vector<IMathNode*> GetInteractableRows() { return {}; }
 
     virtual bool IsOperator() const { return false; }
     virtual bool IsText() const { return false; }

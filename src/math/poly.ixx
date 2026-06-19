@@ -61,12 +61,7 @@ public:
 
         std::string result;
 
-<<<<<<< HEAD
         for (std::size_t index = 0; index < coefficients_.size(); ++index) {
-=======
-        for (std::size_t power = coefficients_.size(); power > 0; --power) {
-            const std::size_t index = power - 1;
->>>>>>> main
             const Rational current = coefficients_[index];
 
             if (current.isZero()) {
@@ -147,7 +142,6 @@ public:
         return !(left == right);
     }
 
-<<<<<<< HEAD
     [[nodiscard]] Polynomial derivative() const {
         if (coefficients_.size() <= 1) {
             return Polynomial{};
@@ -168,8 +162,6 @@ public:
         return Polynomial{std::move(result)};
     }
 
-=======
->>>>>>> main
 private:
     std::vector<Rational> coefficients_;
 

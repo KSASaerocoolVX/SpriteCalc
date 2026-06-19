@@ -12,6 +12,7 @@ import InputScreen;
 import MathEditor;
 import TextNode;
 import IMathNode;
+import CalculatorUITab;
 
 export class CalculatorUI : public UIElement
 {
@@ -22,10 +23,17 @@ private:
     sf::Sprite m_sprite;
     std::vector<std::unique_ptr<UIElement>> children;
 
+    //для вкладок
+    std::vector<std::unique_ptr<CalculatorUITab>> m_tabs;
+
     std::string m_inputBuffer;
     InputScreen* m_screenRef = nullptr; 
 
+    std::unique_ptr<sf::RenderWindow> m_helpWindow;
+    std::string m_helpTextStr;
+
     void HandleButtonPress(const std::string& label);
+    void ShowHelpWindow();
 
 public:
     //CalculatorUI(sf::Vector2f position);

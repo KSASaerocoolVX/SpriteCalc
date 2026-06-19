@@ -78,7 +78,10 @@ SelfTestResult runSelfTest()
         {"prime(5)", "1"},
         {"prime(6)", "0"},
         {"modpow(2, 3, 5)", "3"},
-        {"modinv(3, 7)", "5"}
+        {"modinv(3, 7)", "5"},
+        {"5 % 3", "2"},
+        {"10 % 3", "1"},
+        {"-5 % 3", "-2"}
     };
 
     const std::vector<ErrorCase> errorCases{
@@ -89,7 +92,9 @@ SelfTestResult runSelfTest()
         {"det([1,2,3;4,5,6])"}, // not square
         {"phi(1.5)"}, // not integer
         {"19823712938712983712908371908273901287319023871"},
-        {"2^1.5"}
+        {"2^1.5"},
+        {"5 % 0"},
+        {"1.5 % 2"}
     };
 
     for (const auto& test : valueCases) {

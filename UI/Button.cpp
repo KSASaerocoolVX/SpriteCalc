@@ -20,10 +20,16 @@ Button::Button(sf::Vector2f position, const std::string& idleTexPath, const std:
 		auto& font = AssetManager::Instance().GetFont("UI/assets/RetroGaming.ttf");
 		m_text.emplace(font);
 		m_text->setString(label);
-		m_text->setCharacterSize(56);
+		m_text->setCharacterSize(label == "DEL" ? 46 : 56);
 		m_text->setScale(sf::Vector2f(0.25f, 0.25f));
 		m_text->setFillColor(sf::Color(99, 155, 255));
-		m_text->setPosition(sf::Vector2f(0.0f, 0.0f));
+		
+		sf::FloatRect textRect = m_text->getLocalBounds();
+		m_text->setOrigin(sf::Vector2f(textRect.position.x + textRect.size.x / 2.0f, textRect.position.y + textRect.size.y / 2.0f));
+		
+		float buttonCenterX = m_sprite.getLocalBounds().size.x / 2.0f;
+		float buttonCenterY = m_sprite.getLocalBounds().size.y / 2.0f;
+		m_text->setPosition(sf::Vector2f(buttonCenterX, buttonCenterY));
 	}
 }
 

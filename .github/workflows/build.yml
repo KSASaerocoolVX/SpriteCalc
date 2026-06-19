@@ -1,0 +1,30 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  # Старые подпроекты SFML (freetype, ogg, flac, vorbis) объявляют
+  # cmake_minimum_required < 3.5, который новый CMake уже не принимает.
+  # Передаём через окружение, чтобы PowerShell не ломал значение "3.5".
+  CMAKE_POLICY_VERSION_MINIMUM: "3.5"
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build

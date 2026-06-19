@@ -75,7 +75,12 @@ void InputScreen::SetOutput(IMathNode* node) {
 
         sf::FloatRect bgBounds = m_sprite.getLocalBounds();
         float x = bgBounds.size.x - m.width - 2.0f;
-        float y = bgBounds.size.y - m.height - 8.0f; //todo подкорректировать паддинг
+        if (m.height > 20.0f) {
+            x = 2.0f;
+        }
+        float y = bgBounds.size.y - m.height - 8.0f;
+        if (y < 2.0f) y = 2.0f;
+        if (y < 2.0f) y = 2.0f; //todo подкорректировать паддинг
 
         m_outputExpression->setPosition(sf::Vector2f(x, y));
     }

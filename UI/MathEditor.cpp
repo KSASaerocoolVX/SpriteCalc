@@ -6,181 +6,181 @@ module;
 
 module MathEditor;
 
+import MathRow;
+import TextNode;
+import FractionNode;
+import ExponentNode;
+import IMathNode;
+
+struct MathEditor::Impl {
+    std::vector<std::pair<void*, int>> m_path;
+    IMathNode* m_currentRow;
+    int m_currentIndex;
+
+    float m_cursorTimer = 0.f;
+    bool m_cursorVisible = true;
+
+    std::unique_ptr<IMathNode> m_root;
+    std::vector<IMathNode*> m_rowStack;
+    TextNode* m_activeTextNode = nullptr;
+
+    void RefreshCursor() {
+        static_cast<MathRow*>(m_root.get())->ClearCursor();
+        static_cast<MathRow*>(m_currentRow)->SetCursor(m_currentIndex, m_cursorVisible);
+    }
+};
+
 MathEditor::MathEditor()
 {
+    m_impl = std::make_unique<Impl>();
     Clear();
 }
 
+MathEditor::~MathEditor() = default;
 
-MathRow* MathEditor::GetRoot() {
-    return m_root.get();
+void* MathEditor::GetRoot() {
+    return m_impl->m_root.get();
 }
 
-
 void MathEditor::Clear() {
-    m_root = std::make_unique<MathRow>();
-    m_path.clear();
-    m_currentRow = m_root.get();
-    m_currentIndex = 0;
-    RefreshCursor();
+    m_impl->m_root = std::make_unique<MathRow>();
+    m_impl->m_path.clear();
+    m_impl->m_currentRow = m_impl->m_root.get();
+    m_impl->m_currentIndex = 0;
+    m_impl->RefreshCursor();
 }
 
 void MathEditor::Update(float deltaTime) {
-    m_cursorTimer += deltaTime;
-    if (m_cursorTimer > 0.5f) {
-        m_cursorTimer = 0.0f;
-        m_cursorVisible = !m_cursorVisible;
-        RefreshCursor();
+    m_impl->m_cursorTimer += deltaTime;
+    if (m_impl->m_cursorTimer > 0.5f) {
+        m_impl->m_cursorTimer = 0.0f;
+        m_impl->m_cursorVisible = !m_impl->m_cursorVisible;
+        m_impl->RefreshCursor();
     }
-}
-
-void MathEditor::RefreshCursor() {
-    m_root->ClearCursor();
-    m_currentRow->SetCursor(m_currentIndex, m_cursorVisible);
 }
 
 void MathEditor::MoveLeft() {
-    m_cursorVisible = true;
-    m_cursorTimer = 0.0f;
+    m_impl->m_cursorVisible = true;
+    m_impl->m_cursorTimer = 0.0f;
 
-    if (m_currentIndex > 0) {
-        IMathNode* leftNode = m_currentRow->GetChild(m_currentIndex - 1);
+    if (m_impl->m_currentIndex > 0) {
+        IMathNode* leftNode = static_cast<MathRow*>(m_impl->m_currentRow)->GetChild(m_impl->m_currentIndex - 1);
         auto rows = leftNode->GetInteractableRows();
         if (!rows.empty()) {
-
-            m_path.push_back({ m_currentRow, m_currentIndex - 1 });
-
-            m_currentRow = rows.back();
-            m_currentIndex = m_currentRow->GetChildCount();
+            m_impl->m_path.push_back({ m_impl->m_currentRow, m_impl->m_currentIndex - 1 });
+            m_impl->m_currentRow = rows.back();
+            m_impl->m_currentIndex = static_cast<MathRow*>(m_impl->m_currentRow)->GetChildCount();
         }
         else {
-            m_currentIndex--;
+            m_impl->m_currentIndex--;
         }
     }
     else {
-        if (!m_path.empty()) {
-            CursorState parent = m_path.back();
-            IMathNode* parentNode = parent.row->GetChild(parent.index);
+        if (!m_impl->m_path.empty()) {
+            auto parent = m_impl->m_path.back();
+            IMathNode* parentNode = static_cast<MathRow*>(parent.first)->GetChild(parent.second);
             auto siblingRows = parentNode->GetInteractableRows();
 
             int mySubRowIndex = -1;
             for (int i = 0; i < siblingRows.size(); i++) {
-                if (siblingRows[i] == m_currentRow) {
+                if (siblingRows[i] == m_impl->m_currentRow) {
                     mySubRowIndex = i;
                     break;
                 }
             }
 
             if (mySubRowIndex > 0) {
-                m_currentRow = siblingRows[mySubRowIndex - 1];
-                m_currentIndex = m_currentRow->GetChildCount();
+                m_impl->m_currentRow = siblingRows[mySubRowIndex - 1];
+                m_impl->m_currentIndex = static_cast<MathRow*>(m_impl->m_currentRow)->GetChildCount();
             }
             else {
-                m_path.pop_back();
-                m_currentRow = parent.row;
-                m_currentIndex = parent.index; 
+                m_impl->m_path.pop_back();
+                m_impl->m_currentRow = static_cast<IMathNode*>(parent.first);
+                m_impl->m_currentIndex = parent.second;
             }
         }
     }
-    RefreshCursor();
+    m_impl->RefreshCursor();
 }
 
 void MathEditor::MoveRight() {
-    m_cursorVisible = true;
-    m_cursorTimer = 0.f;
+    m_impl->m_cursorVisible = true;
+    m_impl->m_cursorTimer = 0.f;
 
-    if (m_currentIndex < m_currentRow->GetChildCount()) {
-        IMathNode* rightNode = m_currentRow->GetChild(m_currentIndex);
+    if (m_impl->m_currentIndex < static_cast<MathRow*>(m_impl->m_currentRow)->GetChildCount()) {
+        IMathNode* rightNode = static_cast<MathRow*>(m_impl->m_currentRow)->GetChild(m_impl->m_currentIndex);
         auto rows = rightNode->GetInteractableRows();
         if (!rows.empty()) {
-            m_path.push_back({ m_currentRow, m_currentIndex });
-            m_currentRow = rows.front();
-            m_currentIndex = 0;
+            m_impl->m_path.push_back({ m_impl->m_currentRow, m_impl->m_currentIndex });
+            m_impl->m_currentRow = rows.front();
+            m_impl->m_currentIndex = 0;
         }
         else {
-            m_currentIndex++;
+            m_impl->m_currentIndex++;
         }
     }
     else {
-        if (!m_path.empty()) {
-            CursorState parent = m_path.back();
-            IMathNode* parentNode = parent.row->GetChild(parent.index);
+        if (!m_impl->m_path.empty()) {
+            auto parent = m_impl->m_path.back();
+            IMathNode* parentNode = static_cast<MathRow*>(parent.first)->GetChild(parent.second);
             auto siblingRows = parentNode->GetInteractableRows();
 
             int mySubRowIndex = -1;
             for (int i = 0; i < siblingRows.size(); i++) {
-                if (siblingRows[i] == m_currentRow) {
+                if (siblingRows[i] == m_impl->m_currentRow) {
                     mySubRowIndex = i;
                     break;
                 }
             }
 
             if (mySubRowIndex != -1 && mySubRowIndex < siblingRows.size() - 1) {
-                m_currentRow = siblingRows[mySubRowIndex + 1];
-                m_currentIndex = 0;
+                m_impl->m_currentRow = siblingRows[mySubRowIndex + 1];
+                m_impl->m_currentIndex = 0;
             }
             else {
-                m_path.pop_back();
-                m_currentRow = parent.row;
-                m_currentIndex = parent.index + 1; 
+                m_impl->m_path.pop_back();
+                m_impl->m_currentRow = static_cast<IMathNode*>(parent.first);
+                m_impl->m_currentIndex = parent.second + 1;
             }
         }
     }
-    RefreshCursor();
+    m_impl->RefreshCursor();
 }
 
 void MathEditor::Delete() {
-    if (m_currentIndex > 0) {
-        IMathNode* leftNode = m_currentRow->GetChild(m_currentIndex - 1);
-
-        if (leftNode->IsText() && !leftNode->IsOperator()) {
-            TextNode* text = static_cast<TextNode*>(leftNode);
-            if (text->PopChar()) {
-                m_currentRow->RemoveChild(m_currentIndex - 1);
-                m_currentIndex--;
-            }
-        }
-        else {
-            m_currentRow->RemoveChild(m_currentIndex - 1);
-            m_currentIndex--;
-        }
+    if (m_impl->m_currentIndex > 0) {
+        static_cast<MathRow*>(m_impl->m_currentRow)->RemoveChild(m_impl->m_currentIndex - 1);
+        m_impl->m_currentIndex--;
     }
-    else if (!m_path.empty()) {
+    else if (!m_impl->m_path.empty()) {
         MoveLeft();
     }
-    RefreshCursor();
+    m_impl->RefreshCursor();
 }
 
 void MathEditor::InsertDigit(const std::string& digit) {
-    if (m_currentIndex > 0) {
-        IMathNode* prev = m_currentRow->GetChild(m_currentIndex - 1);
-        if (prev->IsText() && !prev->IsOperator()) {
-            static_cast<TextNode*>(prev)->AppendText(digit);
-            RefreshCursor();
-            return;
-        }
-    }
     auto newNode = std::make_unique<TextNode>(digit, 56, sf::Color(75, 105, 47));
-    m_currentRow->InsertChild(m_currentIndex, std::move(newNode));
-    m_currentIndex++;
-    RefreshCursor();
+    static_cast<MathRow*>(m_impl->m_currentRow)->InsertChild(m_impl->m_currentIndex, std::move(newNode));
+
+    m_impl->m_currentIndex++;
+    m_impl->RefreshCursor();
 }
 
 void MathEditor::InsertOperator(const std::string& op) {
     auto newNode = std::make_unique<TextNode>(op, 56, sf::Color(75, 105, 47), true);
-    m_currentRow->InsertChild(m_currentIndex, std::move(newNode));
-    m_currentIndex++;
-    RefreshCursor();
+    static_cast<MathRow*>(m_impl->m_currentRow)->InsertChild(m_impl->m_currentIndex, std::move(newNode));
+    m_impl->m_currentIndex++;
+    m_impl->RefreshCursor();
 }
 
 void MathEditor::InsertFraction() {
     std::unique_ptr<IMathNode> numContent;
 
-    if (m_currentIndex > 0) {
-        IMathNode* prev = m_currentRow->GetChild(m_currentIndex - 1);
+    if (m_impl->m_currentIndex > 0) {
+        IMathNode* prev = static_cast<MathRow*>(m_impl->m_currentRow)->GetChild(m_impl->m_currentIndex - 1);
         if (prev && !prev->IsOperator()) {
-            numContent = m_currentRow->RemoveChild(m_currentIndex - 1);
-            m_currentIndex--;
+            numContent = static_cast<MathRow*>(m_impl->m_currentRow)->RemoveChild(m_impl->m_currentIndex - 1);
+            m_impl->m_currentIndex--;
         }
     }
 
@@ -196,42 +196,24 @@ void MathEditor::InsertFraction() {
     MathRow* ptrToDenominator = denRow.get();
 
     auto fraction = std::make_unique<FractionNode>(std::move(numRow), std::move(denRow));
-    m_currentRow->InsertChild(m_currentIndex, std::move(fraction));
+    static_cast<MathRow*>(m_impl->m_currentRow)->InsertChild(m_impl->m_currentIndex, std::move(fraction));
 
-    m_path.push_back({ m_currentRow, m_currentIndex });
-    m_currentRow = ptrToDenominator;
-    m_currentIndex = 0;
-    RefreshCursor();
+    m_impl->m_path.push_back({ m_impl->m_currentRow, m_impl->m_currentIndex });
+    m_impl->m_currentRow = ptrToDenominator;
+    m_impl->m_currentIndex = 0;
+    m_impl->RefreshCursor();
 }
 
 void MathEditor::InsertExponent() {
-    std::unique_ptr<IMathNode> baseContent;
-
-    if (m_currentIndex > 0) {
-        IMathNode* prev = m_currentRow->GetChild(m_currentIndex - 1);
-        if (prev && !prev->IsOperator()) {
-            baseContent = m_currentRow->RemoveChild(m_currentIndex - 1);
-            m_currentIndex--;
-        }
-    }
-
-    auto baseRow = std::make_unique<MathRow>();
-    if (baseContent) {
-        baseRow->AddChild(std::move(baseContent));
-    }
-    else {
-        baseRow->AddChild(std::make_unique<TextNode>(" ", 56, sf::Color(75, 105, 47)));
-    }
-
     auto powRow = std::make_unique<MathRow>();
     MathRow* ptrToPower = powRow.get();
 
-    auto exponent = std::make_unique<ExponentNode>(std::move(baseRow), std::move(powRow));
-    m_currentRow->InsertChild(m_currentIndex, std::move(exponent));
+    auto exponent = std::make_unique<ExponentNode>(std::move(powRow));
 
-    m_path.push_back({ m_currentRow, m_currentIndex });
-    m_currentRow = ptrToPower;
-    m_currentIndex = 0;
-    RefreshCursor();
+    static_cast<MathRow*>(m_impl->m_currentRow)->InsertChild(m_impl->m_currentIndex, std::move(exponent));
+
+    m_impl->m_path.push_back({ m_impl->m_currentRow, m_impl->m_currentIndex });
+    m_impl->m_currentRow = ptrToPower;
+    m_impl->m_currentIndex = 0;
+    m_impl->RefreshCursor();
 }
-

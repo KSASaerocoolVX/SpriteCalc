@@ -12,7 +12,7 @@ using namespace std;
 
 struct Config
 {
-	unsigned int windowWidth = 800;
+	unsigned int windowWidth = 1200;
 	unsigned int windowHeight = 800;
 	
 	bool enableBg = false;
